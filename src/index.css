@@ -1,0 +1,74 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/forms";
+@plugin "@tailwindcss/container-queries";
+
+@theme {
+    /* Marca: Colores Principales */
+    --color-primary: #005a9e;
+    --color-primary-100: #e0f2fe;
+    --color-accent: #50A5D8;
+
+    /* Semántica de Estados */
+    --color-success: #10b981;
+    --color-warning: #f59e0b;
+    --color-danger: #ef4444;
+
+    /* Fondos y Superficies */
+    --color-background-light: #f5f7f8;
+    --color-background-dark: #0f1a23;
+    --color-surface-light: #ffffff;
+    --color-surface-dark: #1a2632;
+
+    /* Tipografía y Bordes */
+    --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+    /* Radios de borde consistently */
+    --radius-default: 0.25rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 0.75rem;
+}
+
+/* 
+  Forzar modo oscuro basado en la clase .dark 
+  En Tailwind 4, se prefiere definir la variante manualmente si no se usa el sistema por defecto.
+*/
+@variant dark (&:where(.dark, .dark *));
+
+@layer base {
+    html {
+        color-scheme: light;
+        scroll-behavior: smooth;
+    }
+
+    html.dark {
+        color-scheme: dark;
+    }
+
+    body {
+        @apply bg-background-light text-slate-800 antialiased;
+        font-family: var(--font-display);
+    }
+
+    .dark body {
+        @apply bg-background-dark text-slate-100;
+    }
+
+    /* Mejora de legibilidad de iconos */
+    .material-icons,
+    .material-icons-outlined,
+    .material-symbols-outlined {
+        font-display: block;
+        user-select: none;
+    }
+}
+
+@layer utilities {
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+}
