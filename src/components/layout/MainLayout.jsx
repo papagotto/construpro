@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
+import ChatWidget from '../ChatWidget';
 
 const MainLayout = () => {
     return (
@@ -12,9 +13,7 @@ const MainLayout = () => {
                     <Outlet />
                 </div>
             </main>
-            <button className="fixed bottom-6 right-6 bg-primary hover:bg-primary/90 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110">
-                <span className="material-icons text-2xl">add</span>
-            </button>
+            <ChatWidget />
         </div>
     );
 };

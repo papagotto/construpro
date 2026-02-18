@@ -128,13 +128,6 @@ const Finances = () => {
                     </div>
                 </div>
             </div>
-
-            {/* Floating Action Button with quick actions design */}
-            <div className="fixed bottom-8 right-8 flex flex-col items-end gap-4">
-                <button className="w-14 h-14 bg-primary text-white rounded-full shadow-lg shadow-primary/30 flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-50 group">
-                    <span className="material-icons text-3xl group-hover:rotate-90 transition-transform">add</span>
-                </button>
-            </div>
         </div>
     );
 };
