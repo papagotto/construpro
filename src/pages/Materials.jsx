@@ -27,34 +27,37 @@ const Materials = () => {
                 </Link>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-wrap gap-4 items-center mb-6 shadow-sm">
-                <div className="relative flex-1 min-w-[240px]">
+            <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row gap-4 items-center mb-6 shadow-sm">
+                <div className="relative w-full md:flex-1">
                     <span className="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">inventory</span>
                     <input
-                        className="w-full pl-10 pr-4 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg text-sm focus:ring-primary focus:border-primary"
+                        className="w-full pl-10 pr-4 py-2.5 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg text-sm focus:ring-primary focus:border-primary transition-all"
                         placeholder="Buscar por SKU o Nombre..."
                         type="text"
                     />
                 </div>
-                <select className="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg text-sm focus:ring-primary focus:border-primary px-4 py-2 min-w-[160px]">
-                    <option value="">Todas las Categorías</option>
-                    <option value="cemento">Cemento</option>
-                    <option value="acero">Acero</option>
-                    <option value="madera">Madera</option>
-                </select>
-                <select className="border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg text-sm focus:ring-primary focus:border-primary px-4 py-2 min-w-[160px]">
-                    <option value="">Disponibilidad</option>
-                    <option value="high">Stock Alto</option>
-                    <option value="low">Stock Bajo</option>
-                    <option value="out">Sin Stock</option>
-                </select>
-                <button className="p-2 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                <div className="w-full md:w-auto flex flex-col md:flex-row gap-4 flex-1">
+                    <select className="w-full md:w-[200px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg text-sm focus:ring-primary focus:border-primary px-4 py-2.5 transition-all">
+                        <option value="">Todas las Categorías</option>
+                        <option value="cemento">Cemento</option>
+                        <option value="acero">Acero</option>
+                        <option value="madera">Madera</option>
+                    </select>
+                    <select className="w-full md:w-[180px] border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg text-sm focus:ring-primary focus:border-primary px-4 py-2.5 transition-all">
+                        <option value="">Disponibilidad</option>
+                        <option value="high">Stock Alto</option>
+                        <option value="low">Stock Bajo</option>
+                        <option value="out">Sin Stock</option>
+                    </select>
+                </div>
+                <button className="w-full md:w-auto p-2.5 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex justify-center items-center">
                     <span className="material-icons text-slate-600 dark:text-slate-400">filter_list</span>
                 </button>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
-                <div className="overflow-x-auto">
+            <div className="bg-transparent md:bg-white dark:md:bg-slate-900 md:rounded-xl md:border md:border-slate-200 md:dark:border-slate-800 overflow-hidden md:shadow-sm">
+                {/* Desktop Table */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
@@ -115,6 +118,55 @@ const Materials = () => {
                             ))}
                         </tbody>
                     </table>
+                </div>
+
+                {/* Mobile Cards */}
+                <div className="md:hidden space-y-4">
+                    {materials.map((item) => (
+                        <div 
+                            key={item.id} 
+                            className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 active:scale-[0.98] transition-all"
+                            onClick={() => navigate(`/recursos-materiales/${item.id}`)}
+                        >
+                            <div className="flex gap-4">
+                                <div className="w-20 h-20 rounded-xl bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-100 dark:border-slate-800 flex-shrink-0 shadow-sm">
+                                    <img alt={item.name} className="w-full h-full object-cover" src={item.image} />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex justify-between items-start">
+                                        <h3 className="font-bold text-slate-900 dark:text-white text-base leading-tight truncate">{item.name}</h3>
+                                        <span className="text-[9px] font-mono text-slate-400 bg-slate-50 dark:bg-slate-800 px-1.5 py-0.5 rounded-md border border-slate-100 dark:border-slate-800">{item.sku}</span>
+                                    </div>
+                                    <div className="mt-2 flex flex-wrap gap-2">
+                                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${item.categoryColor}`}>
+                                            {item.category}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6 pt-2 border-t border-slate-50 dark:border-slate-800/50">
+                                <div>
+                                    <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1.5">Stock Disponible</p>
+                                    <div className="flex items-center gap-2">
+                                        <span className={`text-sm font-black ${item.stock < 100 ? 'text-red-600 dark:text-red-400' : 'text-slate-900 dark:text-white'}`}>
+                                            {item.stock.toLocaleString()} {item.unit}
+                                        </span>
+                                    </div>
+                                    <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full mt-2 overflow-hidden">
+                                        <div className={`h-full rounded-full ${item.progressColor}`} style={{ width: `${item.progress}%` }}></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1.5">Ubicación</p>
+                                    <div className="flex items-center gap-2 text-xs text-slate-700 dark:text-slate-300 font-bold">
+                                        <span className="material-icons text-base text-slate-400">location_on</span>
+                                        {item.location}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
                 <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                     <p className="text-sm text-slate-500">

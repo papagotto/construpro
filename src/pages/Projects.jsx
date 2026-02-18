@@ -26,17 +26,17 @@ const Projects = () => {
             </div>
 
             <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 mb-6 shadow-sm">
-                <div className="flex flex-wrap items-center gap-4">
-                    <div className="flex-1 min-w-[240px] relative">
+                <div className="flex flex-col md:flex-row items-center gap-4">
+                    <div className="w-full md:flex-1 relative">
                         <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[20px]">search</span>
                         <input
-                            className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-primary focus:border-primary border"
+                            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-primary focus:border-primary border transition-all"
                             placeholder="Nombre o cliente..."
                             type="text"
                         />
                     </div>
-                    <div className="w-48">
-                        <select className="w-full py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-primary focus:border-primary border">
+                    <div className="w-full md:w-48">
+                        <select className="w-full py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-primary focus:border-primary border transition-all">
                             <option value="">Todos los Estados</option>
                             <option value="activo">Activo</option>
                             <option value="pausa">En Pausa</option>
@@ -44,24 +44,25 @@ const Projects = () => {
                             <option value="cancelado">Cancelado</option>
                         </select>
                     </div>
-                    <div className="w-56 relative">
+                    <div className="w-full md:w-56 relative">
                         <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">calendar_today</span>
                         <input
-                            className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-primary focus:border-primary border"
+                            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-primary focus:border-primary border transition-all"
                             onFocus={(e) => (e.target.type = 'date')}
                             placeholder="Fecha de Fin Estimada"
                             type="text"
                         />
                     </div>
-                    <button className="px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium flex items-center gap-2 border border-slate-200 dark:border-slate-700">
+                    <button className="w-full md:w-auto px-4 py-2.5 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 transition-all">
                         <span className="material-symbols-outlined text-[18px]">filter_list</span>
                         Más Filtros
                     </button>
                 </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
+            <div className="bg-transparent md:bg-white dark:md:bg-slate-900 md:rounded-xl md:border md:border-slate-200 md:dark:border-slate-800 md:shadow-sm overflow-hidden">
+                {/* Desktop Table */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
@@ -128,6 +129,71 @@ const Projects = () => {
                             ))}
                         </tbody>
                     </table>
+                </div>
+
+                {/* Mobile Cards View */}
+                <div className="md:hidden space-y-4">
+                    {detailedProjects.map((project) => (
+                        <div 
+                            key={project.id} 
+                            className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 active:scale-[0.98] transition-all"
+                            onClick={() => navigate(`/proyectos/${project.id}`)}
+                        >
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <h3 className="text-lg font-black text-slate-900 dark:text-white leading-tight">{project.name}</h3>
+                                    <p className="text-sm text-slate-500 mt-1 flex items-center gap-1.5">
+                                        <span className="material-symbols-outlined text-base">person</span>
+                                        {project.client}
+                                    </p>
+                                </div>
+                                <span className={`px-3 py-1.5 text-[10px] font-black uppercase rounded-full shadow-sm ${project.stageColor}`}>
+                                    {project.stage}
+                                </span>
+                            </div>
+
+                            <div className="space-y-3 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800/30">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Estado de Obra</span>
+                                    <span className="text-xs font-black text-slate-900 dark:text-white">{project.progress}%</span>
+                                </div>
+                                <div className="w-full bg-white dark:bg-slate-800 h-2.5 rounded-full overflow-hidden shadow-inner border border-slate-100 dark:border-slate-700/50">
+                                    <div className="bg-accent h-full rounded-full transition-all duration-1000" style={{ width: `${project.progress}%` }}></div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-y-5 gap-x-2 pt-2">
+                                <div>
+                                    <p className="text-[9px] text-slate-400 uppercase font-black tracking-widest mb-1.5">Presupuesto</p>
+                                    <p className="text-sm font-black text-slate-900 dark:text-white">{formatCurrency(project.budget)}</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-[9px] text-slate-400 uppercase font-black tracking-widest mb-1.5">Gasto Real</p>
+                                    <p className={`text-sm font-black ${
+                                        project.spentStatus === 'danger' ? 'text-red-500' :
+                                        project.spentStatus === 'warning' ? 'text-orange-500' :
+                                        'text-emerald-600'
+                                    }`}>
+                                        {formatCurrency(project.spent)}
+                                    </p>
+                                </div>
+                                <div className="pt-2 border-t border-slate-50 dark:border-slate-800/30">
+                                    <p className="text-[9px] text-slate-400 uppercase font-black tracking-widest mb-1.5">Fecha Inicio</p>
+                                    <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-400">
+                                        <span className="material-symbols-outlined text-[14px]">calendar_today</span>
+                                        {project.startDate}
+                                    </div>
+                                </div>
+                                <div className="text-right pt-2 border-t border-slate-50 dark:border-slate-800/30">
+                                    <p className="text-[9px] text-slate-400 uppercase font-black tracking-widest mb-1.5">Entrega Est.</p>
+                                    <div className="flex items-center justify-end gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-400">
+                                        <span className="material-symbols-outlined text-[14px]">event_available</span>
+                                        {project.endDate}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
                 <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between border-t border-slate-200 dark:border-slate-800">
                     <p className="text-xs text-slate-500">Mostrando <span className="font-medium text-slate-900 dark:text-white">1</span> a <span className="font-medium text-slate-900 dark:text-white">3</span> de <span className="font-medium text-slate-900 dark:text-white">24</span> proyectos</p>
