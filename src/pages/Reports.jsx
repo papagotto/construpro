@@ -19,7 +19,7 @@ const Reports = () => {
 
             {/* Selector de Reporte */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {reports.types.map((type) => (
+                {reports?.types?.map((type) => (
                     <div
                         key={type.id}
                         className={`bg-white dark:bg-surface-dark border-2 rounded-xl p-5 shadow-sm cursor-pointer relative transition-all group ${type.selected ? 'border-primary' : 'border-transparent hover:border-slate-200 dark:hover:border-slate-800'}`}
@@ -46,10 +46,10 @@ const Reports = () => {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {finances.summary.map((kpi, idx) => (
+                    {finances?.summary?.map((kpi, idx) => (
                         <div key={idx} className="bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group">
                             <div className="flex justify-between items-start mb-4">
-                                <div className={`p-2 rounded-lg ${kpi.iconColor} bg-opacity-10`}>
+                                <div className={`p-2 rounded-lg ${kpi.iconColor || 'bg-primary/10 text-primary'} bg-opacity-10`}>
                                     <span className="material-icons-outlined block">{kpi.icon}</span>
                                 </div>
                                 <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-full ${
@@ -75,7 +75,7 @@ const Reports = () => {
                             <button className="text-primary text-xs font-bold uppercase hover:underline">Ver Auditoría</button>
                         </div>
                         <div className="h-64 flex items-end gap-4 px-4">
-                            {finances.monthlyHistory.map((data, idx) => (
+                            {finances?.monthlyHistory?.map((data, idx) => (
                                 <div key={idx} className="flex-1 flex flex-col justify-end gap-1 group">
                                     <div className="w-full h-full flex items-end justify-center gap-1">
                                         <div 
@@ -110,7 +110,7 @@ const Reports = () => {
                             <span className="material-icons text-orange-500">priority_high</span>
                         </div>
                         <div className="flex-1 space-y-4">
-                            {finances.deviations.map((dev, idx) => (
+                            {finances?.deviations?.map((dev, idx) => (
                                 <div key={idx} className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
                                     <div className="flex justify-between items-center mb-2">
                                         <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{dev.project}</span>

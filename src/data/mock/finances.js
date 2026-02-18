@@ -31,13 +31,23 @@ export const transactions = [
 // RESUMEN FINANCIERO (Vistas agregadas)
 export const finances = {
     summary: [
-        { label: 'Ingresos Totales', value: '$1.250.000,00', change: '+8.2%', trend: 'up', icon: 'payments' },
-        { label: 'Costos Totales', value: '$840.000,00', change: '+2.4%', trend: 'neutral', icon: 'receipt_long' },
-        { label: 'Margen Bruto', value: '32.8%', change: '+1.5%', trend: 'up', icon: 'pie_chart' }
+        { label: 'Ingresos Totales', value: '$1.250.000,00', change: '+8.2%', trend: 'up', icon: 'payments', iconColor: 'bg-emerald-500 text-emerald-600' },
+        { label: 'Costos Totales', value: '$840.000,00', change: '+2.4%', trend: 'neutral', icon: 'receipt_long', iconColor: 'bg-blue-500 text-blue-600' },
+        { label: 'Margen Bruto', value: '32.8%', change: '+1.5%', trend: 'up', icon: 'pie_chart', iconColor: 'bg-purple-500 text-purple-600' },
+        { label: 'Gastos Administrativos', value: '$120.000,00', change: '-0.5%', trend: 'up', icon: 'assessment', iconColor: 'bg-orange-500 text-orange-600' }
     ],
     monthlyHistory: [
         { month: 'Ene', budget: 180000, actual: 165000 },
-        { month: 'Feb', budget: 210000, actual: 225000 }
+        { month: 'Feb', budget: 210000, actual: 225000 },
+        { month: 'Mar', budget: 195000, actual: 198000 },
+        { month: 'Abr', budget: 240000, actual: 210000 },
+        { month: 'May', budget: 220000, actual: 235000 },
+        { month: 'Jun', budget: 280000, actual: 295000 }
+    ],
+    deviations: [
+        { project: 'Torre Delta', deviation: '+15.2%', status: 'danger' },
+        { project: 'Residencial Los Álamos', deviation: '+8.4%', status: 'warning' },
+        { project: 'Puente Industrial', deviation: '+4.1%', status: 'warning' }
     ],
     movements: transactions
 };
