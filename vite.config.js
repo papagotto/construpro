@@ -13,5 +13,8 @@ export default defineConfig({
     port: 8000,
     strictPort: true,
     host: true
+  },
+  preview: {
+    port: 3000  // Cambia por el puerto deseado, ej. 3000 o 8080
   }
 })
