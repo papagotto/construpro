@@ -65,6 +65,60 @@ export const allTasks = [
         assigned: [
             { name: 'Carlos Ruiz', role: 'Capataz', avatar: 'C' }
         ]
+    },
+    {
+        id: 10,
+        projectId: 4,
+        projectCode: '#PRJ-SXXI',
+        title: 'Levantado de muros lucera',
+        status: 'enProceso',
+        priority: 'Media',
+        priorityColor: 'bg-orange-100 text-orange-600',
+        date: 'Feb 20',
+        dateColor: 'text-slate-500',
+        description: 'Construcción de tabiques con ladrillo portante 18x19x39 según plano de planta baja.',
+        checklist: [
+            { text: 'Replanteo de muros', completed: true },
+            { text: 'Colocación de primera hilada', completed: true },
+            { text: 'Elevación hasta 1.20m', completed: false }
+        ],
+        resources: [
+            { name: 'Ladrillo Portante', quantity: '700 unidades' }
+        ],
+        assigned: [{ name: 'Carlos Ruiz', role: 'Capataz' }],
+        log: []
+    },
+    {
+        id: 11,
+        projectId: 4,
+        projectCode: '#PRJ-SXXI',
+        title: 'Revoque grueso sector aulas',
+        status: 'pendiente',
+        priority: 'Media',
+        priorityColor: 'bg-orange-100 text-orange-600',
+        date: 'Feb 25',
+        dateColor: 'text-slate-500',
+        description: 'Aplicación de revoque grueso con hidrófugo en muros interiores.',
+        checklist: [],
+        resources: [],
+        assigned: [],
+        log: []
+    },
+    {
+        id: 12,
+        projectId: 4,
+        projectCode: '#PRJ-SXXI',
+        title: 'Preparación de losa para impermeabilización',
+        status: 'pendiente',
+        priority: 'Alta',
+        priorityColor: 'bg-amber-100 text-amber-600',
+        date: 'Mar 02',
+        dateColor: 'text-slate-500',
+        description: 'Limpieza y sellado de grietas antes de aplicar emulsión asfáltica.',
+        checklist: [],
+        resources: [],
+        assigned: [],
+        log: []
     }
 ];
 

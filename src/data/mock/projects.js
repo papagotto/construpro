@@ -30,7 +30,35 @@ export const detailedProjects = [
             { name: 'Acero Corrugado', stock: '35%', status: 'Crítico' }
         ],
         spentPercent: 85,
-        spentStatus: 'warning'
+        spentStatus: 'warning',
+        stages: [
+            {
+                id: 's1',
+                name: 'Cimentación y Capa Aisladora',
+                status: 'Completado',
+                materialComputations: [],
+                tasks: [3] // ID de la tarea 'Vaciado de losa cimentación'
+            },
+            {
+                id: 's2',
+                name: 'Mampostería Planta Baja',
+                status: 'En curso',
+                materialComputations: [
+                    {
+                        id: 'c1',
+                        type: 'Mampostería',
+                        dimensions: { length: 20, height: 3 },
+                        area: 60,
+                        results: [
+                            { name: 'Ladrillo Portante 18x19x39', quantity: 750, unit: 'unidades', status: 'Pendiente' },
+                            { name: 'Cemento Albañilería (25kg)', quantity: 30, unit: 'bolsas', status: 'Pendiente' },
+                            { name: 'Arena Gruesa', quantity: 1.2, unit: 'm3', status: 'Pendiente' }
+                        ]
+                    }
+                ],
+                tasks: [2] // ID de la tarea 'Acarreo de material'
+            }
+        ]
     },
     {
         id: 2,
@@ -56,7 +84,8 @@ export const detailedProjects = [
         ],
         criticalResources: [],
         spentPercent: 10,
-        spentStatus: 'normal'
+        spentStatus: 'normal',
+        stages: []
     },
     {
         id: 3,
@@ -78,7 +107,107 @@ export const detailedProjects = [
         team: [],
         criticalResources: [],
         spentPercent: 108,
-        spentStatus: 'danger'
+        spentStatus: 'danger',
+        stages: []
+    },
+    {
+        id: 4,
+        code: 'PRJ-SXXI',
+        name: 'Aulas Siglo XXI - Villa María',
+        client: 'Campus Universitario SXXI',
+        stage: 'Obra Civil II',
+        stageColor: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+        progress: 35,
+        status: 'En curso',
+        statusColor: 'bg-green-100 text-green-700',
+        startDate: '01 Feb, 2026',
+        endDate: '15 Dic, 2026',
+        daysLeft: 300,
+        budget: 2500000,
+        spent: 450000,
+        pendingTasks: 24,
+        milestones: [
+            { id: 'm10', name: 'Mampostería PB', status: 'active', date: 'En curso' },
+            { id: 'm11', name: 'Cubierta Losas', status: 'pending', date: 'Mayo 2026' }
+        ],
+        team: [
+            { id: 'u5', name: 'Sofía Cantisani', role: 'Arq. Responsable', avatar: 'S' },
+            { id: 'u6', name: 'Carlos Ruiz', role: 'Jefe de Obra', avatar: 'C' }
+        ],
+        criticalResources: [
+            { name: 'Hercal 25kg', stock: '85%', status: 'Saludable' },
+            { name: 'Ladrillo 18x19x39', stock: '20%', status: 'Crítico' }
+        ],
+        spentPercent: 18,
+        spentStatus: 'normal',
+        stages: [
+            {
+                id: 'sxxi-s1',
+                name: 'Mampostería y Revoques',
+                status: 'En curso',
+                materialComputations: [
+                    {
+                        id: 'c101',
+                        type: 'Mampostería Lucera',
+                        dimensions: { length: 70.8, height: 1.2 },
+                        area: 85,
+                        results: [
+                            { name: 'Bloques Cerámicos 18x19x39', quantity: 1190, unit: 'unidades', status: 'Pendiente' },
+                            { name: 'Hercal (25kg)', quantity: 11, unit: 'bolsas', status: 'En Obra' },
+                            { name: 'Arena Gruesa', quantity: 1.36, unit: 'm3', status: 'En Obra' }
+                        ]
+                    },
+                    {
+                        id: 'c102',
+                        type: 'Revoque Grueso',
+                        dimensions: { length: 85, height: 2 },
+                        area: 170,
+                        results: [
+                            { name: 'Hercal (25kg)', quantity: 26, unit: 'bolsas', status: 'En Obra' },
+                            { name: 'Arena Gruesa', quantity: 3.4, unit: 'm3', status: 'En Obra' },
+                            { name: 'Hidrófugo (5L)', quantity: 3, unit: 'bidones', status: 'Pendiente' }
+                        ]
+                    }
+                ],
+                tasks: [10, 11]
+            },
+            {
+                id: 'sxxi-s2',
+                name: 'Cubierta e Impermeabilización',
+                status: 'Pendiente',
+                materialComputations: [
+                    {
+                        id: 'c103',
+                        type: 'Cubierta 553m2',
+                        dimensions: { length: 553, height: 1 },
+                        area: 553,
+                        results: [
+                            { name: 'Sikalastic 560 (20kg)', quantity: 55, unit: 'baldes', status: 'Pendiente' },
+                            { name: 'Membrana Geotextil', quantity: 65, unit: 'rollos', status: 'Pendiente' },
+                            { name: 'Hormigón Alivianado H13', quantity: 75, unit: 'm3', status: 'Pendiente' }
+                        ]
+                    }
+                ],
+                tasks: [12]
+            },
+            {
+                id: 'sxxi-s3',
+                name: 'Instalaciones Sanitarias',
+                status: 'Pendiente',
+                materialComputations: [
+                    {
+                        id: 'c104',
+                        type: 'Cloacas y Artefactos',
+                        results: [
+                            { name: 'Inodoro Bari Ferrum', quantity: 12, unit: 'unidades', status: 'Pendiente' },
+                            { name: 'Bacha Arianna Ferrum', quantity: 12, unit: 'unidades', status: 'Pendiente' },
+                            { name: 'Caño 110 Cloacas', quantity: 144, unit: 'ml', status: 'Pendiente' }
+                        ]
+                    }
+                ],
+                tasks: []
+            }
+        ]
     }
 ];
 
