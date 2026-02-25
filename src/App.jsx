@@ -13,6 +13,7 @@ import Finances from './pages/Finances';
 import Users from './pages/Users';
 import Reports from './pages/Reports';
 import Configuration from './pages/Configuration';
+import Profile from './pages/Profile';
 import Login from './pages/Login';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
@@ -62,6 +63,7 @@ function App() {
             <Route path="usuarios" element={<Users />} />
             <Route path="reportes" element={<Reports />} />
             <Route path="configuracion" element={<Configuration />} />
+            <Route path="perfil" element={<Profile />} />
           </Route>
 
           {/* Redirección por defecto */}

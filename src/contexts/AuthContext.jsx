@@ -76,8 +76,28 @@ export const AuthProvider = ({ children }) => {
         if (error) throw error;
     };
 
+    const updateProfile = async (updates) => {
+        try {
+            if (!user) throw new Error('No hay sesión activa');
+            
+            const { error } = await supabase
+                .from('usuarios')
+                .update(updates)
+                .eq('id', user.id);
+
+            if (error) throw error;
+
+            // Refrescar el perfil localmente
+            await fetchProfile(user.id);
+            return { success: true };
+        } catch (error) {
+            console.error('Error al actualizar perfil:', error);
+            throw error;
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, profile, loading, login, logout }}>
+        <AuthContext.Provider value={{ user, profile, loading, login, logout, updateProfile }}>
             {children}
         </AuthContext.Provider>
     );

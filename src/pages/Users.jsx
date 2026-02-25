@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { 
     LucideUserPlus, LucideBadgeCheck, LucideShield, 
@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 
 const Users = () => {
+    const navigate = useNavigate();
     const [users, setUsers] = useState([]);
     const [roles, setRoles] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -157,7 +158,10 @@ const Users = () => {
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex justify-end gap-2">
-                                                <button className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-all">
+                                                <button 
+                                                    onClick={() => navigate('/perfil')}
+                                                    className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
+                                                >
                                                     <LucideSettings size={18} />
                                                 </button>
                                                 <button className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all">
