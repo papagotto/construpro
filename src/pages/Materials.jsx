@@ -75,6 +75,12 @@ const Materials = () => {
                 >
                     Equipamiento
                 </Link>
+                <Link
+                    to="/usuarios"
+                    className="px-6 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 border-b-2 border-transparent"
+                >
+                    Personal
+                </Link>
             </div>
 
             <div className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row gap-4 items-center mb-6 shadow-sm">

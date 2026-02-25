@@ -62,6 +62,12 @@ const Equipment = () => {
                     Materiales
                 </Link>
                 <button className="px-6 py-3 text-sm font-semibold border-b-2 border-primary text-primary">Equipamiento</button>
+                <Link
+                    to="/usuarios"
+                    className="px-6 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 border-b-2 border-transparent"
+                >
+                    Personal
+                </Link>
             </div>
 
             <div className="flex flex-col sm:flex-row items-center gap-4 mb-8">

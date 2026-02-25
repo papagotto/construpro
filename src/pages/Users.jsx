@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { 
     LucideUserPlus, LucideBadgeCheck, LucideShield, 
@@ -54,7 +55,7 @@ const Users = () => {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Gestión de Personal</h1>
+                    <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Catálogo de Recursos</h1>
                     <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Administra los accesos, roles y asignaciones del equipo técnico.</p>
                 </div>
                 <button 
@@ -64,6 +65,23 @@ const Users = () => {
                     <LucideUserPlus size={18} />
                     Añadir Integrante
                 </button>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex border-b border-slate-200 dark:border-slate-800 mb-6">
+                <Link
+                    to="/recursos-materiales"
+                    className="px-6 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 border-b-2 border-transparent"
+                >
+                    Materiales
+                </Link>
+                <Link
+                    to="/recursos-equipos"
+                    className="px-6 py-3 text-sm font-medium text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 border-b-2 border-transparent"
+                >
+                    Equipamiento
+                </Link>
+                <button className="px-6 py-3 text-sm font-semibold border-b-2 border-primary text-primary">Personal</button>
             </div>
 
             {/* Stats Summary */}

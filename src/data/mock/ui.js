@@ -7,16 +7,16 @@ export const navigation = [
         name: 'Recursos',
         href: '/recursos',
         icon: 'inventory_2',
-        category: 'Recursos',
+        category: 'General',
         subItems: [
             { name: 'Materiales', href: '/recursos-materiales', icon: 'storage' },
             { name: 'Equipamiento', href: '/recursos-equipos', icon: 'precision_manufacturing' },
             { name: 'Personal', href: '/usuarios', icon: 'badge' }
         ]
     },
-    { name: 'Finanzas', href: '/finanzas', icon: 'payments', category: 'Recursos' },
-    { name: 'Reportes', href: '/reportes', icon: 'bar_chart', category: 'Recursos' },
-    { name: 'Configuración', href: '/configuracion', icon: 'settings', category: 'Recursos' },
+    { name: 'Finanzas', href: '/finanzas', icon: 'payments', category: 'General' },
+    { name: 'Reportes', href: '/reportes', icon: 'bar_chart', category: 'General' },
+    { name: 'Configuración', href: '/configuracion', icon: 'settings', category: 'General' },
 ];
 
 export const reports = {
