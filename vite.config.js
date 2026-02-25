@@ -15,6 +15,22 @@ export default defineConfig({
     host: true
   },
   preview: {
-    port: 3000  // Cambia por el puerto deseado, ej. 3000 o 8080
+    port: 3000
+  },
+  build: {
+    chunkSizeWarningLimit: 1000,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            // Agrupar librerías grandes por separado
+            if (id.includes('lucide-react')) return 'vendor-ui';
+            if (id.includes('@supabase')) return 'vendor-supabase';
+            if (id.includes('@hello-pangea')) return 'vendor-kanban';
+            return 'vendor'; // El resto de node_modules
+          }
+        }
+      }
+    }
   }
 })

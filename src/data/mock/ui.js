@@ -10,7 +10,8 @@ export const navigation = [
         category: 'Recursos',
         subItems: [
             { name: 'Materiales', href: '/recursos-materiales', icon: 'storage' },
-            { name: 'Equipamiento', href: '/recursos-equipos', icon: 'precision_manufacturing' }
+            { name: 'Equipamiento', href: '/recursos-equipos', icon: 'precision_manufacturing' },
+            { name: 'Personal', href: '/usuarios', icon: 'badge' }
         ]
     },
     { name: 'Finanzas', href: '/finanzas', icon: 'payments', category: 'Recursos' },

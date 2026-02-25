@@ -1,8 +1,60 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { detailedProjects } from '../data/mockData';
+import { supabase } from '../lib/supabase';
 
 const Projects = () => {
     const navigate = useNavigate();
+    const [projects, setProjects] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchProjects();
+    }, []);
+
+    const fetchProjects = async () => {
+        try {
+            setLoading(true);
+            // Consultamos directamente a nuestra nueva vista inteligente
+            const { data, error } = await supabase
+                .from('proyectos_resumen')
+                .select('*')
+                .eq('is_deleted', false)
+                .order('created_at', { ascending: false });
+
+            console.log('Datos de Proyectos Recibidos:', data);
+            if (error) {
+                console.error('Error de Supabase en Proyectos:', error);
+                throw error;
+            }
+
+            // Mapear los datos de la vista al formato que usa la interfaz
+            const mappedProjects = data.map(project => ({
+                id: project.id,
+                name: project.nombre,
+                client: project.cliente,
+                budget: Number(project.presupuesto || 0),
+                startDate: new Date(project.fecha_inicio).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }),
+                endDate: project.fecha_fin ? new Date(project.fecha_fin).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : 'No definida',
+                progress: Math.round(project.progreso_fisico_total),
+                stage: project.estado === 'en_curso' ? 'Activo' : 
+                       project.estado === 'en_riesgo' ? 'En Riesgo' : 
+                       project.estado === 'pendiente' ? 'Pendiente' : 'Finalizado',
+                stageColor: project.estado === 'en_curso' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' :
+                           project.estado === 'en_riesgo' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                           project.estado === 'finalizado' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                           'bg-slate-100 text-slate-700 dark:bg-slate-900/30 dark:text-slate-400',
+                spent: Number(project.gasto_real_total || 0),
+                spentPercent: Math.round(project.progreso_financiero_total),
+                spentStatus: project.progreso_financiero_total > 90 ? 'danger' : project.progreso_financiero_total > 75 ? 'warning' : 'normal'
+            }));
+
+            setProjects(mappedProjects);
+        } catch (error) {
+            console.error('Error cargando proyectos:', error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const formatCurrency = (value) => {
         return new Intl.NumberFormat('en-US', {
@@ -76,7 +128,15 @@ const Projects = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-                            {detailedProjects.map((project) => (
+                            {loading ? (
+                                <tr>
+                                    <td colSpan="7" className="px-6 py-12 text-center text-slate-500">Cargando proyectos...</td>
+                                </tr>
+                            ) : projects.length === 0 ? (
+                                <tr>
+                                    <td colSpan="7" className="px-6 py-12 text-center text-slate-500">No se encontraron proyectos.</td>
+                                </tr>
+                            ) : projects.map((project) => (
                                 <tr 
                                     key={project.id} 
                                     className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer group"
@@ -133,7 +193,9 @@ const Projects = () => {
 
                 {/* Mobile Cards View */}
                 <div className="md:hidden space-y-4">
-                    {detailedProjects.map((project) => (
+                    {loading ? (
+                        <div className="p-12 text-center text-slate-500">Cargando...</div>
+                    ) : projects.map((project) => (
                         <div 
                             key={project.id} 
                             className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 active:scale-[0.98] transition-all"
@@ -196,7 +258,7 @@ const Projects = () => {
                     ))}
                 </div>
                 <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 flex items-center justify-between border-t border-slate-200 dark:border-slate-800">
-                    <p className="text-xs text-slate-500">Mostrando <span className="font-medium text-slate-900 dark:text-white">1</span> a <span className="font-medium text-slate-900 dark:text-white">3</span> de <span className="font-medium text-slate-900 dark:text-white">24</span> proyectos</p>
+                    <p className="text-xs text-slate-500">Mostrando <span className="font-medium text-slate-900 dark:text-white">1</span> a <span className="font-medium text-slate-900 dark:text-white">{projects.length}</span> de <span className="font-medium text-slate-900 dark:text-white">{projects.length}</span> proyectos</p>
                     <div className="flex items-center gap-2">
                         <button className="px-3 py-1.5 text-xs font-medium text-slate-500 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 disabled:opacity-50">
                             Anterior
