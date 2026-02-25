@@ -18,6 +18,8 @@ const ProjectDetail = () => {
     const [newStageName, setNewStageName] = useState('');
     const [showTaskForm, setShowTaskForm] = useState(false);
     const [newTaskTitle, setNewTaskTitle] = useState('');
+    const [newTaskBudget, setNewTaskBudget] = useState('');
+    const [newTaskEndDate, setNewTaskEndDate] = useState('');
 
     useEffect(() => {
         fetchProjectData();
@@ -79,18 +81,29 @@ const ProjectDetail = () => {
                 stageColor: data.estado === 'en_curso' ? 'bg-blue-100 text-blue-700' : 
                            data.estado === 'en_riesgo' ? 'bg-amber-100 text-amber-700' :
                            data.estado === 'finalizado' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700',
-                stages: data.etapas?.map(s => ({
-                    id: s.id,
-                    name: s.nombre,
-                    status: s.is_deleted ? 'Eliminado' : 'Activo',
-                    materialComputations: [],
-                    tasks: s.tareas?.map(t => ({
-                        id: t.id,
-                        title: t.titulo,
-                        status: t.estado,
-                        assigned: []
-                    })) || []
-                })) || [],
+                stages: data.etapas?.map(s => {
+                    const stageTasks = s.tareas?.filter(t => !t.is_deleted) || [];
+                    const stageBudget = stageTasks.reduce((sum, t) => sum + Number(t.costo_presupuestado || 0), 0);
+                    const stageEndDate = stageTasks.length > 0 
+                        ? new Date(Math.max(...stageTasks.map(t => t.fecha_fin_estimada ? new Date(t.fecha_fin_estimada) : 0)))
+                        : null;
+
+                    return {
+                        id: s.id,
+                        name: s.nombre,
+                        status: s.is_deleted ? 'Eliminado' : 'Activo',
+                        budget: stageBudget,
+                        endDate: stageEndDate && stageEndDate.getTime() > 0 ? stageEndDate.toLocaleDateString('es-ES') : 'Pendiente',
+                        tasks: stageTasks.map(t => ({
+                            id: t.id,
+                            title: t.titulo,
+                            status: t.estado,
+                            budget: Number(t.costo_presupuestado || 0),
+                            endDate: t.fecha_fin_estimada ? new Date(t.fecha_fin_estimada).toLocaleDateString('es-ES') : 'S/D',
+                            assigned: []
+                        }))
+                    };
+                }) || [],
                 pendingTasks: pendingTasksCount
             };
 
@@ -118,6 +131,7 @@ const ProjectDetail = () => {
             setShowNewStageInput(false);
         } catch (error) {
             console.error('Error creando etapa:', error.message);
+            alert('Error al crear la etapa: ' + error.message);
         }
     };
 
@@ -130,6 +144,8 @@ const ProjectDetail = () => {
                     etapa_id: activeStageId, 
                     titulo: newTaskTitle, 
                     estado: 'pendiente',
+                    costo_presupuestado: newTaskBudget ? parseFloat(newTaskBudget) : 0,
+                    fecha_fin_estimada: newTaskEndDate || null,
                     cantidad_medida: 0
                 }]);
 
@@ -137,9 +153,12 @@ const ProjectDetail = () => {
             
             fetchProjectData();
             setNewTaskTitle('');
+            setNewTaskBudget('');
+            setNewTaskEndDate('');
             setShowTaskForm(false);
         } catch (error) {
             console.error('Error creando tarea:', error.message);
+            alert('Error al crear la tarea: ' + error.message);
         }
     };
 
@@ -231,7 +250,16 @@ const ProjectDetail = () => {
                                             <div className="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer" onClick={() => setActiveStageId(activeStageId === stage.id ? null : stage.id)}>
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold bg-blue-100 text-blue-600"><LucideClock size={16} /></div>
-                                                    <div><h4 className="text-sm font-bold text-slate-900 dark:text-white">{stage.name}</h4><p className="text-[10px] text-slate-500 uppercase font-bold">{stage.status}</p></div>
+                                                    <div>
+                                                        <h4 className="text-sm font-bold text-slate-900 dark:text-white">{stage.name}</h4>
+                                                        <div className="flex items-center gap-3 mt-0.5">
+                                                            <p className="text-[10px] text-slate-500 uppercase font-bold">{stage.status}</p>
+                                                            <span className="text-[10px] text-slate-300">|</span>
+                                                            <p className="text-[10px] text-emerald-600 font-bold">${stage.budget.toLocaleString()}</p>
+                                                            <span className="text-[10px] text-slate-300">|</span>
+                                                            <p className="text-[10px] text-blue-600 font-bold">Fin: {stage.endDate}</p>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                                 <LucideChevronRight size={20} className={`text-slate-400 transition-transform ${activeStageId === stage.id ? 'rotate-90' : ''}`} />
                                             </div>
@@ -244,9 +272,22 @@ const ProjectDetail = () => {
                                                             <button onClick={() => setShowTaskForm(true)} className="flex items-center gap-1 text-[10px] bg-emerald-100 text-emerald-600 px-2 py-1 rounded-full font-bold hover:bg-emerald-200 transition-colors"><LucidePlus size={12} /> Nueva Tarea</button>
                                                         </div>
                                                         {showTaskForm && (
-                                                            <div className="mb-3 flex gap-2 animate-in slide-in-from-top-2">
-                                                                <input autoFocus value={newTaskTitle} onChange={(e) => setNewTaskTitle(e.target.value)} placeholder="Título de la tarea..." className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded px-3 py-1 text-xs outline-none focus:border-emerald-500" />
-                                                                <button onClick={handleAddTask} className="bg-emerald-500 text-white px-3 py-1 rounded text-xs font-bold">Añadir</button>
+                                                            <div className="mb-4 space-y-3 p-4 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 animate-in slide-in-from-top-2 shadow-sm">
+                                                                <input autoFocus value={newTaskTitle} onChange={(e) => setNewTaskTitle(e.target.value)} placeholder="Título de la tarea..." className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-sm outline-none focus:border-emerald-500" />
+                                                                <div className="flex gap-3">
+                                                                    <div className="flex-1">
+                                                                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Presupuesto ($)</label>
+                                                                        <input type="number" value={newTaskBudget} onChange={(e) => setNewTaskBudget(e.target.value)} placeholder="0.00" className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-sm outline-none focus:border-emerald-500" />
+                                                                    </div>
+                                                                    <div className="flex-1">
+                                                                        <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">Fecha Fin</label>
+                                                                        <input type="date" value={newTaskEndDate} onChange={(e) => setNewTaskEndDate(e.target.value)} className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded px-3 py-2 text-sm outline-none focus:border-emerald-500" />
+                                                                    </div>
+                                                                </div>
+                                                                <div className="flex justify-end gap-2">
+                                                                    <button onClick={() => setShowTaskForm(false)} className="px-3 py-1 text-sm text-slate-500">Cancelar</button>
+                                                                    <button onClick={handleAddTask} className="bg-emerald-500 text-white px-4 py-1 rounded text-sm font-bold shadow-sm hover:bg-emerald-600 transition-colors">Añadir Tarea</button>
+                                                                </div>
                                                             </div>
                                                         )}
                                                         <div className="space-y-2">
@@ -255,9 +296,20 @@ const ProjectDetail = () => {
                                                                     <div key={t.id} className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg group">
                                                                         <div className="flex items-center gap-3">
                                                                             <div className={`w-2 h-2 rounded-full ${t.status === 'finalizada' ? 'bg-emerald-500' : 'bg-orange-400'}`}></div>
-                                                                            <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{t.title}</span>
+                                                                            <div>
+                                                                                <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{t.title}</span>
+                                                                                <div className="flex gap-2 mt-1">
+                                                                                    <span className="text-[9px] text-slate-400 font-bold">${t.budget.toLocaleString()}</span>
+                                                                                    <span className="text-[9px] text-slate-300">•</span>
+                                                                                    <span className="text-[9px] text-slate-400 font-bold">{t.endDate}</span>
+                                                                                </div>
+                                                                            </div>
                                                                         </div>
-                                                                        <div className="flex items-center gap-3"><LucideUser size={14} className="text-slate-300" /></div>
+                                                                        <div className="flex items-center gap-3">
+                                                                            <Link to={`/tareas/${t.id}`} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-colors">
+                                                                                <LucideChevronRight size={14} className="text-slate-300" />
+                                                                            </Link>
+                                                                        </div>
                                                                     </div>
                                                                 ))
                                                             ) : (<div className="text-center py-4 border border-dashed border-slate-200 dark:border-slate-800 rounded-lg"><p className="text-[10px] text-slate-400">Sin tareas asignadas.</p></div>)}
