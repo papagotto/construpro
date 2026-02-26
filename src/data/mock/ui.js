@@ -14,6 +14,16 @@ export const navigation = [
             { name: 'Personal', href: '/usuarios', icon: 'badge' }
         ]
     },
+    {
+        name: 'Ingeniería',
+        href: '/ingenieria-menu',
+        icon: 'architecture',
+        category: 'General',
+        subItems: [
+            { name: 'APU', href: '/ingenieria', icon: 'settings_suggest' },
+            { name: 'Unidades', href: '/unidades', icon: 'straighten' }
+        ]
+    },
     { name: 'Finanzas', href: '/finanzas', icon: 'payments', category: 'General' },
     { name: 'Reportes', href: '/reportes', icon: 'bar_chart', category: 'General' },
     { name: 'Configuración', href: '/configuracion', icon: 'settings', category: 'General' },

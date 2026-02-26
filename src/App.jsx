@@ -11,6 +11,9 @@ import Equipment from './pages/Equipment';
 import EquipmentDetail from './pages/EquipmentDetail';
 import Finances from './pages/Finances';
 import Users from './pages/Users';
+import Engineering from './pages/Engineering';
+import RubroDetail from './pages/RubroDetail';
+import Units from './pages/Units';
 import Reports from './pages/Reports';
 import Configuration from './pages/Configuration';
 import Profile from './pages/Profile';
@@ -61,6 +64,9 @@ function App() {
             <Route path="recursos-equipos/:id" element={<EquipmentDetail />} />
             <Route path="finanzas" element={<Finances />} />
             <Route path="usuarios" element={<Users />} />
+            <Route path="ingenieria" element={<Engineering />} />
+            <Route path="ingenieria/:id" element={<RubroDetail />} />
+            <Route path="unidades" element={<Units />} />
             <Route path="reportes" element={<Reports />} />
             <Route path="configuracion" element={<Configuration />} />
             <Route path="perfil" element={<Profile />} />

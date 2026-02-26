@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { getMediaUrl } from '../lib/storage';
 
 const Materials = () => {
     const navigate = useNavigate();
@@ -14,7 +15,7 @@ const Materials = () => {
     const fetchMaterials = async () => {
         try {
             setLoading(true);
-            // Consultamos recursos y traemos el stock sumado (o el primero disponible para el ejemplo)
+            // Consultamos recursos y traemos el stock sumado
             const { data, error } = await supabase
                 .from('recursos')
                 .select(`
@@ -39,9 +40,9 @@ const Materials = () => {
                     stock: stockTotal,
                     unit: item.unit_base || 'unidades',
                     description: item.descripcion,
-                    image: item.imagen || 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?q=80&w=200&auto=format&fit=crop',
+                    image: getMediaUrl(item.imagen_path) || item.imagen || 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?q=80&w=200&auto=format&fit=crop',
                     location: item.ubicacion,
-                    progress: Math.min((stockTotal / 1000) * 100, 100), // Ejemplo: meta de 1000 para barra de progreso
+                    progress: Math.min((stockTotal / 1000) * 100, 100),
                     progressColor: stockTotal < 100 ? 'bg-red-500' : stockTotal < 500 ? 'bg-amber-500' : 'bg-emerald-500'
                 };
             });

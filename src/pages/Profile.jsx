@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { getMediaUrl, uploadMedia } from '../lib/storage';
 import { 
     LucideCamera, LucideUser, LucideBriefcase, 
     LucideMail, LucidePhone, LucideEdit3, 
@@ -11,7 +12,9 @@ const Profile = () => {
     const { profile, user, updateProfile } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
+    const fileInputRef = useRef(null);
     
     // Estado del formulario
     const [formData, setFormData] = useState({
@@ -46,19 +49,58 @@ const Profile = () => {
         }
     };
 
+    const handleAvatarClick = () => {
+        if (isEditing) {
+            fileInputRef.current?.click();
+        }
+    };
+
+    const handleFileChange = async (event) => {
+        const file = event.target.files?.[0];
+        if (!file || !user) return;
+
+        try {
+            setIsUploading(true);
+            
+            // 1. Subir usando la utilidad centralizada
+            const filePath = await uploadMedia(file, 'profiles', user.id);
+
+            // 2. Actualizar tabla usuarios con el PATH RELATIVO
+            await updateProfile({
+                avatar_url: filePath
+            });
+
+            setShowSuccess(true);
+            setTimeout(() => setShowSuccess(false), 3000);
+        } catch (error) {
+            alert('Error al subir la imagen: ' + error.message);
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
     const userName = profile?.nombre || user?.email?.split('@')[0] || 'Usuario';
     const userRole = profile?.roles?.nombre || 'Consultor';
-    const userAvatar = profile?.avatar_url;
+    const userAvatar = getMediaUrl(profile?.avatar_url);
     const userEmail = user?.email || '';
 
     return (
         <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500 pb-10">
+            {/* Input de archivo oculto */}
+            <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileChange} 
+                accept="image/*" 
+                className="hidden" 
+            />
+
             {/* Mensaje de Éxito Flotante */}
             {showSuccess && (
                 <div className="fixed top-20 right-8 z-50 animate-in slide-in-from-right duration-300">
                     <div className="bg-emerald-500 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
                         <LucideCheckCircle2 size={20} />
-                        <span className="font-bold text-sm">¡Perfil actualizado con éxito!</span>
+                        <span className="font-bold text-sm">¡Operación completada con éxito!</span>
                     </div>
                 </div>
             )}
@@ -74,7 +116,7 @@ const Profile = () => {
                 {!isEditing ? (
                     <button 
                         onClick={() => setIsEditing(true)}
-                        className="inline-flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 px-5 py-2.5 rounded-xl font-bold transition-all active:scale-95 border border-slate-200 dark:border-slate-700"
+                        className="inline-flex items-center justify-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary px-5 py-2.5 rounded-xl font-bold transition-all active:scale-95 border border-primary/10"
                     >
                         <LucideEdit3 size={18} />
                         Editar Perfil
@@ -90,7 +132,7 @@ const Profile = () => {
                                     telefono: profile.telefono || ''
                                 });
                             }}
-                            disabled={isSaving}
+                            disabled={isSaving || isUploading}
                             className="inline-flex items-center justify-center gap-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 px-4 py-2.5 rounded-xl font-bold hover:bg-slate-50 transition-all disabled:opacity-50"
                         >
                             <LucideX size={18} />
@@ -98,7 +140,7 @@ const Profile = () => {
                         </button>
                         <button 
                             onClick={handleSave}
-                            disabled={isSaving}
+                            disabled={isSaving || isUploading}
                             className="inline-flex items-center justify-center gap-2 bg-primary text-white px-6 py-2.5 rounded-xl font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95 disabled:opacity-70"
                         >
                             {isSaving ? (
@@ -126,16 +168,28 @@ const Profile = () => {
                             <img
                                 src={userAvatar}
                                 alt="Profile"
-                                className="w-36 h-36 rounded-full object-cover ring-4 ring-slate-50 dark:ring-slate-800 transition-all group-hover:ring-primary/20"
+                                className={`w-36 h-36 rounded-full object-cover ring-4 ring-slate-50 dark:ring-slate-800 transition-all group-hover:ring-primary/20 ${isEditing ? 'cursor-pointer hover:opacity-80' : ''}`}
+                                onClick={handleAvatarClick}
                             />
                         ) : (
-                            <div className="w-36 h-36 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center ring-4 ring-slate-50 dark:ring-slate-800 transition-all group-hover:ring-primary/20 border border-slate-200 dark:border-slate-700">
-                                <LucideUser size={56} className="text-slate-400" />
+                            <div 
+                                className={`w-36 h-36 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center ring-4 ring-slate-50 dark:ring-slate-800 transition-all group-hover:ring-primary/20 border border-slate-200 dark:border-slate-700 ${isEditing ? 'cursor-pointer hover:opacity-80' : ''}`}
+                                onClick={handleAvatarClick}
+                            >
+                                {isUploading ? (
+                                    <LucideLoader2 size={40} className="text-primary animate-spin" />
+                                ) : (
+                                    <LucideUser size={56} className="text-slate-400" />
+                                )}
                             </div>
                         )}
                         {isEditing && (
-                            <button className="absolute bottom-1 right-1 bg-primary text-white p-2.5 rounded-full shadow-xl border-2 border-white dark:border-slate-900 hover:scale-110 transition-transform animate-in zoom-in">
-                                <LucideCamera size={18} />
+                            <button 
+                                onClick={handleAvatarClick}
+                                disabled={isUploading}
+                                className="absolute bottom-1 right-1 bg-primary text-white p-2.5 rounded-full shadow-xl border-2 border-white dark:border-slate-900 hover:scale-110 transition-transform animate-in zoom-in"
+                            >
+                                {isUploading ? <LucideLoader2 size={18} className="animate-spin" /> : <LucideCamera size={18} />}
                             </button>
                         )}
                     </div>

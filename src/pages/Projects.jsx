@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { getMediaUrl } from '../lib/storage';
 
 const Projects = () => {
     const navigate = useNavigate();
@@ -21,11 +22,7 @@ const Projects = () => {
                 .eq('is_deleted', false)
                 .order('created_at', { ascending: false });
 
-            console.log('Datos de Proyectos Recibidos:', data);
-            if (error) {
-                console.error('Error de Supabase en Proyectos:', error);
-                throw error;
-            }
+            if (error) throw error;
 
             // Mapear los datos de la vista al formato que usa la interfaz
             const mappedProjects = data.map(project => ({
@@ -36,6 +33,7 @@ const Projects = () => {
                 startDate: new Date(project.fecha_inicio).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }),
                 endDate: project.fecha_fin ? new Date(project.fecha_fin).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : 'No definida',
                 progress: Math.round(project.progreso_fisico_total),
+                image: getMediaUrl(project.portada_path) || 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=400&auto=format&fit=crop',
                 stage: project.estado === 'en_curso' ? 'Activo' : 
                        project.estado === 'en_riesgo' ? 'En Riesgo' : 
                        project.estado === 'pendiente' ? 'Pendiente' : 'Finalizado',
@@ -143,8 +141,15 @@ const Projects = () => {
                                     onClick={() => navigate(`/proyectos/${project.id}`)}
                                 >
                                     <td className="px-6 py-4">
-                                        <div className="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">{project.name}</div>
-                                        <div className="text-sm text-slate-500">{project.client}</div>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 flex-shrink-0">
+                                                <img src={project.image} alt={project.name} className="w-full h-full object-cover" />
+                                            </div>
+                                            <div>
+                                                <div className="font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">{project.name}</div>
+                                                <div className="text-sm text-slate-500">{project.client}</div>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`px-2.5 py-1 text-xs font-medium rounded-full ${project.stageColor}`}>
@@ -201,17 +206,24 @@ const Projects = () => {
                             className="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-5 active:scale-[0.98] transition-all"
                             onClick={() => navigate(`/proyectos/${project.id}`)}
                         >
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <h3 className="text-lg font-black text-slate-900 dark:text-white leading-tight">{project.name}</h3>
-                                    <p className="text-sm text-slate-500 mt-1 flex items-center gap-1.5">
-                                        <span className="material-symbols-outlined text-base">person</span>
-                                        {project.client}
-                                    </p>
+                            <div className="flex gap-4">
+                                <div className="w-16 h-16 rounded-xl overflow-hidden border border-slate-100 dark:border-slate-800 flex-shrink-0">
+                                    <img src={project.image} alt={project.name} className="w-full h-full object-cover" />
                                 </div>
-                                <span className={`px-3 py-1.5 text-[10px] font-black uppercase rounded-full shadow-sm ${project.stageColor}`}>
-                                    {project.stage}
-                                </span>
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <h3 className="text-lg font-black text-slate-900 dark:text-white leading-tight truncate">{project.name}</h3>
+                                            <p className="text-sm text-slate-500 mt-1 flex items-center gap-1.5">
+                                                <span className="material-symbols-outlined text-base">person</span>
+                                                {project.client}
+                                            </p>
+                                        </div>
+                                        <span className={`px-2 py-1 text-[9px] font-black uppercase rounded-full shadow-sm ${project.stageColor}`}>
+                                            {project.stage}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="space-y-3 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-800/30">

@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { getMediaUrl } from '../lib/storage';
 
 const Equipment = () => {
+    const navigate = useNavigate();
     const [equipment, setEquipment] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -28,7 +30,7 @@ const Equipment = () => {
                         item.estado === 'mantenimiento' ? 'Mantenimiento' : 'Disponible',
                 statusColor: item.estado === 'uso' ? 'bg-blue-100 text-blue-700' :
                             item.estado === 'mantenimiento' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700',
-                image: item.imagen || 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?q=80&w=400&auto=format&fit=crop',
+                image: getMediaUrl(item.imagen_path) || item.imagen || 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?q=80&w=400&auto=format&fit=crop',
                 maintenanceDate: item.fecha_mantenimiento ? new Date(item.fecha_mantenimiento).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : 'No programada',
                 isWarning: item.is_warning
             }));

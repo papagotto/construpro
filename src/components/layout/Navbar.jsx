@@ -1,11 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { getMediaUrl } from '../../lib/storage';
 
 const Navbar = ({ onToggleSidebar }) => {
     const { profile, user, logout } = useAuth();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [imageError, setImageError] = useState(false);
     const menuRef = useRef(null);
+
+    // Resetear error de imagen si cambia el path del avatar
+    useEffect(() => {
+        setImageError(false);
+    }, [profile?.avatar_url]);
 
     // Cerrar menú al hacer clic fuera
     useEffect(() => {
@@ -29,12 +36,16 @@ const Navbar = ({ onToggleSidebar }) => {
     // Obtener iniciales si no hay avatar
     const getInitials = (name) => {
         if (!name) return 'U';
-        return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+        const parts = name.trim().split(' ');
+        if (parts.length > 1) {
+            return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+        }
+        return parts[0].substring(0, 2).toUpperCase();
     };
 
     const userName = profile?.nombre || user?.email?.split('@')[0] || 'Usuario';
     const userRole = profile?.roles?.nombre || 'Consultor';
-    const userAvatar = profile?.avatar_url;
+    const userAvatar = getMediaUrl(profile?.avatar_url);
 
     return (
         <nav className="fixed top-0 z-50 w-full bg-surface-light dark:bg-surface-dark border-b border-slate-200 dark:border-slate-800 h-16 flex items-center px-6">
@@ -92,11 +103,12 @@ const Navbar = ({ onToggleSidebar }) => {
                             </p>
                         </div>
                         <div className="relative">
-                            {userAvatar ? (
+                            {userAvatar && !imageError ? (
                                 <img
                                     alt={userName}
                                     className="w-9 h-9 rounded-full object-cover ring-2 ring-primary/10 group-hover:ring-primary transition-all"
                                     src={userAvatar}
+                                    onError={() => setImageError(true)}
                                 />
                             ) : (
                                 <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center ring-2 ring-primary/10 group-hover:ring-primary transition-all text-primary font-bold text-xs">

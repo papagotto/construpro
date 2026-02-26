@@ -1,17 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { getMediaUrl, uploadMedia } from '../lib/storage';
 import MaterialCalculator from '../components/MaterialCalculator';
 import { 
     LucideLayers, LucidePlus, LucideCalculator, LucideCheckCircle2, 
     LucideClock, LucideAlertTriangle, LucideChevronRight, LucidePackage,
-    LucideClipboardList, LucideUser
+    LucideClipboardList, LucideUser, LucideCamera, LucideLoader2
 } from 'lucide-react';
 
 const ProjectDetail = () => {
     const { id } = useParams();
     const [project, setProject] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isUploading, setIsUploading] = useState(false);
     const [activeStageId, setActiveStageId] = useState(null);
     const [showCalculator, setShowCalculator] = useState(false);
     const [showNewStageInput, setShowNewStageInput] = useState(false);
@@ -20,6 +22,7 @@ const ProjectDetail = () => {
     const [newTaskTitle, setNewTaskTitle] = useState('');
     const [newTaskBudget, setNewTaskBudget] = useState('');
     const [newTaskEndDate, setNewTaskEndDate] = useState('');
+    const fileInputRef = useRef(null);
 
     useEffect(() => {
         fetchProjectData();
@@ -65,6 +68,7 @@ const ProjectDetail = () => {
 
             // Mapear al formato esperado por la UI
             const mappedProject = {
+                ...data,
                 id: data.id,
                 name: data.nombre,
                 client: data.cliente,
@@ -115,18 +119,40 @@ const ProjectDetail = () => {
         }
     };
 
+    const handleFileChange = async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        try {
+            setIsUploading(true);
+            const filePath = await uploadMedia(file, 'projects', id);
+
+            // Actualizar en DB
+            const { error } = await supabase
+                .from('proyectos')
+                .update({ portada_path: filePath })
+                .eq('id', id);
+
+            if (error) throw error;
+
+            fetchProjectData();
+        } catch (error) {
+            alert('Error al subir la imagen: ' + error.message);
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
     const handleAddStage = async () => {
         if (!newStageName.trim()) return;
         try {
-            const { data, error } = await supabase
+            const { error } = await supabase
                 .from('etapas')
-                .insert([{ proyecto_id: id, nombre: newStageName, orden: (project.stages?.length || 0) + 1 }])
-                .select()
-                .single();
+                .insert([{ proyecto_id: id, nombre: newStageName, orden: (project.stages?.length || 0) + 1 }]);
 
             if (error) throw error;
             
-            fetchProjectData(); // Recargar datos
+            fetchProjectData();
             setNewStageName('');
             setShowNewStageInput(false);
         } catch (error) {
@@ -163,15 +189,25 @@ const ProjectDetail = () => {
     };
 
     const handleSaveComputation = (computation) => {
-        // Implementar guardado en DB de cómputos en la siguiente iteración
         setShowCalculator(false);
     };
 
     if (loading) return <div className="p-8 text-center uppercase tracking-widest text-xs font-bold text-slate-500">Cargando detalles de obra...</div>;
     if (!project) return <div className="p-8">Proyecto no encontrado</div>;
 
+    const projectImage = getMediaUrl(project.portada_path) || 'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?q=80&w=1000&auto=format&fit=crop';
+
     return (
         <div className="space-y-6 animate-in fade-in duration-500 pb-20">
+            {/* Input oculto para subida de archivos */}
+            <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileChange} 
+                accept="image/*" 
+                className="hidden" 
+            />
+
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <nav className="flex mb-2 text-sm font-medium text-slate-500 dark:text-slate-400">
@@ -191,6 +227,20 @@ const ProjectDetail = () => {
                         Generar Reporte
                     </button>
                 </div>
+            </div>
+
+            {/* Banner de Proyecto */}
+            <div className="h-48 md:h-64 rounded-2xl overflow-hidden relative group shadow-lg">
+                <img src={projectImage} alt={project.name} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent"></div>
+                <button 
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="absolute bottom-4 right-4 bg-white/20 backdrop-blur-md text-white border border-white/30 px-4 py-2 rounded-xl text-xs font-bold hover:bg-white/30 transition-all flex items-center gap-2"
+                >
+                    {isUploading ? <LucideLoader2 className="animate-spin" size={14} /> : <LucideCamera size={14} />}
+                    {isUploading ? 'Subiendo...' : 'Cambiar Portada'}
+                </button>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
