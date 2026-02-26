@@ -177,7 +177,7 @@ const RubroDetail = () => {
                                 <div>
                                     <label className="block text-[10px] font-black text-slate-400 uppercase mb-1">Unidad Oficial</label>
                                     <select 
-                                        className="w-full p-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm font-bold text-slate-700 dark:text-white outline-none ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-2 focus:ring-primary/20"
+                                        className="select-custom !p-2 !ring-1"
                                         value={rubro.unidad_id || ''}
                                         onChange={(e) => handleUpdateRubro({ unidad_id: e.target.value })}
                                     >
@@ -286,7 +286,7 @@ const RubroDetail = () => {
                         <div className="p-6 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800">
                             <label className="block text-[10px] font-black text-slate-400 uppercase mb-3">+ Vincular Nuevo Material</label>
                             <select 
-                                className="w-full p-3 bg-white dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-400 outline-none hover:border-primary transition-colors cursor-pointer"
+                                className="select-custom shadow-none border-2 border-dashed !ring-0 !bg-white dark:!bg-slate-900"
                                 onChange={(e) => {
                                     if (e.target.value) handleAddMaterial(e.target.value);
                                     e.target.value = '';

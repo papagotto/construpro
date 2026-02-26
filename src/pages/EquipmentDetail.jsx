@@ -18,6 +18,7 @@ const EquipmentDetail = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
     const fileInputRef = useRef(null);
 
     useEffect(() => {
@@ -63,6 +64,8 @@ const EquipmentDetail = () => {
 
             setItem(editData);
             setIsEditing(false);
+            setShowSuccess(true);
+            setTimeout(() => setShowSuccess(false), 3000);
         } catch (error) {
             alert('Error al guardar: ' + error.message);
         } finally {
@@ -81,19 +84,39 @@ const EquipmentDetail = () => {
 
         try {
             setIsUploading(true);
+            console.log('Iniciando subida de imagen para equipo:', id);
+            
+            // 1. Subir al Storage
             const filePath = await uploadMedia(file, 'equipment', id);
+            console.log('Imagen subida a Storage, path:', filePath);
 
-            const { error } = await supabase
+            // 2. Vincular con la Base de Datos
+            const { data, error, status } = await supabase
                 .from('equipos_fisicos')
                 .update({ imagen_path: filePath })
-                .eq('id', id);
+                .eq('id', id)
+                .select(); // Forzamos el select para confirmar que se escribió
 
-            if (error) throw error;
+            if (error) {
+                console.error('Error de Supabase DB al actualizar imagen_path:', error);
+                throw new Error(`Error en DB (Status ${status}): ${error.message}`);
+            }
 
-            setItem(prev => ({ ...prev, imagen_path: filePath }));
-            setEditData(prev => ({ ...prev, imagen_path: filePath }));
+            if (!data || data.length === 0) {
+                throw new Error('La base de datos no devolvió el registro actualizado. Verifica los permisos RLS.');
+            }
+
+            console.log('Registro actualizado con éxito en DB:', data[0]);
+
+            // 3. Actualizar estado local
+            setItem(data[0]);
+            setEditData(data[0]);
+            setShowSuccess(true);
+            setTimeout(() => setShowSuccess(false), 3000);
+            
         } catch (error) {
-            alert('Error al subir la imagen: ' + error.message);
+            console.error('FLUJO DE CARGA FALLIDO:', error);
+            alert('⚠️ ' + error.message);
         } finally {
             setIsUploading(false);
         }
@@ -107,6 +130,15 @@ const EquipmentDetail = () => {
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500 pb-20">
+            {/* Mensaje de Éxito Flotante */}
+            {showSuccess && (
+                <div className="fixed top-20 right-8 z-[100] animate-in slide-in-from-right duration-300">
+                    <div className="bg-emerald-500 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
+                        <LucideCheckCircle2 size={20} />
+                        <span className="font-bold text-sm">¡Cambios guardados con éxito!</span>
+                    </div>
+                </div>
+            )}
             <input 
                 type="file" 
                 ref={fileInputRef} 
@@ -270,7 +302,7 @@ const EquipmentDetail = () => {
                                     <label className="block text-[10px] font-black text-slate-400 uppercase mb-1">Estado Operativo</label>
                                     {isEditing ? (
                                         <select 
-                                            className="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl text-sm font-bold border-none outline-none ring-2 ring-primary/10 focus:ring-primary"
+                                            className="select-custom !p-2.5 !ring-1"
                                             value={editData.estado}
                                             onChange={(e) => setEditData({...editData, estado: e.target.value})}
                                         >

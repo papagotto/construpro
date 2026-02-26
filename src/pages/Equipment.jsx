@@ -15,25 +15,35 @@ const Equipment = () => {
     const fetchEquipment = async () => {
         try {
             setLoading(true);
+            console.log('--- Fetching Equipment List ---');
+            
             const { data, error } = await supabase
                 .from('equipos_fisicos')
                 .select('*')
-                .eq('is_deleted', false);
+                .eq('is_deleted', false)
+                .order('created_at', { ascending: false });
 
             if (error) throw error;
 
-            const mappedEquipment = data.map(item => ({
-                id: item.id,
-                name: item.nombre,
-                code: item.codigo || 'EQ-N/A',
-                status: item.estado === 'uso' ? 'En Uso' : 
-                        item.estado === 'mantenimiento' ? 'Mantenimiento' : 'Disponible',
-                statusColor: item.estado === 'uso' ? 'bg-blue-100 text-blue-700' :
-                            item.estado === 'mantenimiento' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700',
-                image: getMediaUrl(item.imagen_path) || item.imagen || 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?q=80&w=400&auto=format&fit=crop',
-                maintenanceDate: item.fecha_mantenimiento ? new Date(item.fecha_mantenimiento).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : 'No programada',
-                isWarning: item.is_warning
-            }));
+            const mappedEquipment = data.map(item => {
+                const finalImageUrl = getMediaUrl(item.imagen_path) || item.imagen || 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?q=80&w=400';
+                
+                // Debug log para rastrear qué imagen está cargando cada equipo
+                console.log(`Equipo: ${item.nombre} | Path: ${item.imagen_path} | URL Final: ${finalImageUrl}`);
+
+                return {
+                    id: item.id,
+                    name: item.nombre,
+                    code: item.codigo || 'EQ-N/A',
+                    status: item.estado === 'uso' ? 'En Uso' : 
+                            item.estado === 'mantenimiento' ? 'Mantenimiento' : 'Disponible',
+                    statusColor: item.estado === 'uso' ? 'bg-blue-100 text-blue-700' :
+                                item.estado === 'mantenimiento' ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700',
+                    image: finalImageUrl,
+                    maintenanceDate: item.fecha_mantenimiento ? new Date(item.fecha_mantenimiento).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' }) : 'No programada',
+                    isWarning: item.is_warning
+                };
+            });
 
             setEquipment(mappedEquipment);
         } catch (error) {
@@ -89,8 +99,13 @@ const Equipment = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
                     {equipment.map((item) => (
                         <div key={item.id} className="bg-white dark:bg-slate-900 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow group">
-                            <div className="h-48 overflow-hidden relative">
-                                <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={item.name} src={item.image} />
+                            <div className="h-48 overflow-hidden relative bg-slate-100 dark:bg-slate-800">
+                                <img 
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                                    alt={item.name} 
+                                    src={item.image} 
+                                    key={item.image} // Forzamos re-renderizado del <img> si la URL cambia
+                                />
                                 <span className={`absolute top-3 right-3 text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded shadow-sm ${item.statusColor}`}>
                                     {item.status}
                                 </span>

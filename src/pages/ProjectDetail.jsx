@@ -1,19 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { getMediaUrl, uploadMedia } from '../lib/storage';
 import MaterialCalculator from '../components/MaterialCalculator';
 import { 
     LucideLayers, LucidePlus, LucideCalculator, LucideCheckCircle2, 
     LucideClock, LucideAlertTriangle, LucideChevronRight, LucidePackage,
-    LucideClipboardList, LucideUser, LucideCamera, LucideLoader2
+    LucideClipboardList, LucideUser, LucideCamera, LucideLoader2,
+    LucideEdit3, LucideSave, LucideX, LucideChevronLeft
 } from 'lucide-react';
 
 const ProjectDetail = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [project, setProject] = useState(null);
+    const [editData, setEditData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isEditing, setIsEditing] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
     const [activeStageId, setActiveStageId] = useState(null);
     const [showCalculator, setShowCalculator] = useState(false);
     const [showNewStageInput, setShowNewStageInput] = useState(false);
@@ -112,11 +118,45 @@ const ProjectDetail = () => {
             };
 
             setProject(mappedProject);
+            setEditData(data); // Guardamos la data original para el form de edición
         } catch (error) {
             console.error('Error cargando detalle de proyecto:', error.message);
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleSave = async () => {
+        try {
+            setIsSaving(true);
+            const { error } = await supabase
+                .from('proyectos')
+                .update({
+                    nombre: editData.nombre,
+                    cliente: editData.cliente,
+                    presupuesto: Number(editData.presupuesto),
+                    fecha_inicio: editData.fecha_inicio,
+                    fecha_fin: editData.fecha_fin,
+                    estado: editData.estado
+                })
+                .eq('id', id);
+
+            if (error) throw error;
+
+            fetchProjectData();
+            setIsEditing(false);
+            setShowSuccess(true);
+            setTimeout(() => setShowSuccess(false), 3000);
+        } catch (error) {
+            alert('Error al guardar: ' + error.message);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleCancel = () => {
+        setEditData(project);
+        setIsEditing(false);
     };
 
     const handleFileChange = async (event) => {
@@ -199,7 +239,16 @@ const ProjectDetail = () => {
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500 pb-20">
-            {/* Input oculto para subida de archivos */}
+            {/* Mensaje de Éxito Flotante */}
+            {showSuccess && (
+                <div className="fixed top-20 right-8 z-[100] animate-in slide-in-from-right duration-300">
+                    <div className="bg-emerald-500 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
+                        <LucideCheckCircle2 size={20} />
+                        <span className="font-bold text-sm">¡Proyecto actualizado con éxito!</span>
+                    </div>
+                </div>
+            )}
+
             <input 
                 type="file" 
                 ref={fileInputRef} 
@@ -216,16 +265,51 @@ const ProjectDetail = () => {
                         <span className="text-primary">{project.name}</span>
                     </nav>
                     <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{project.name}</h1>
+                        {isEditing ? (
+                            <input 
+                                className="text-3xl font-bold text-slate-900 dark:text-white leading-none bg-white dark:bg-slate-800 border-2 border-primary/20 rounded-xl px-2 py-1 w-full outline-none focus:border-primary"
+                                value={editData.nombre}
+                                onChange={(e) => setEditData({...editData, nombre: e.target.value})}
+                            />
+                        ) : (
+                            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{project.name}</h1>
+                        )}
                         <span className={`px-3 py-1 text-xs font-semibold rounded-full ${project.stageColor}`}>
                             {project.stage}
                         </span>
                     </div>
                 </div>
                 <div className="flex gap-3">
-                    <button className="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
-                        Generar Reporte
-                    </button>
+                    {isEditing ? (
+                        <>
+                            <button 
+                                onClick={handleCancel}
+                                className="px-5 py-2.5 text-xs font-black uppercase tracking-widest text-slate-500 bg-slate-100 dark:bg-slate-800 rounded-xl hover:bg-slate-200 transition-all flex items-center gap-2"
+                            >
+                                <LucideX size={16} /> Cancelar
+                            </button>
+                            <button 
+                                onClick={handleSave}
+                                disabled={isSaving}
+                                className="px-5 py-2.5 text-xs font-black uppercase tracking-widest text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 transition-all flex items-center gap-2 disabled:opacity-50"
+                            >
+                                {isSaving ? <LucideLoader2 size={16} className="animate-spin" /> : <LucideSave size={16} />}
+                                Guardar Proyecto
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <button 
+                                onClick={() => setIsEditing(true)}
+                                className="px-5 py-2.5 text-xs font-black uppercase tracking-widest text-slate-600 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 transition-all flex items-center gap-2"
+                            >
+                                <LucideEdit3 size={16} /> Editar Proyecto
+                            </button>
+                            <button className="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                                Generar Reporte
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
 
@@ -243,41 +327,90 @@ const ProjectDetail = () => {
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
-                    <div className="relative w-12 h-12 flex-shrink-0">
-                        <svg className="w-full h-full" viewBox="0 0 36 36">
-                            <path className="text-slate-100 dark:text-slate-800" strokeDasharray="100, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
-                            <path className="text-primary" strokeDasharray={`${project.progress}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-                        </svg>
-                        <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold">{project.progress}%</span>
-                    </div>
-                    <div><p className="text-xs font-bold text-slate-400 uppercase">Avance</p><p className="text-lg font-black text-slate-900 dark:text-white">General</p></div>
-                </div>
-
-                <div className="bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center text-orange-600"><LucideClock size={24} /></div>
-                    <div><p className="text-xs font-bold text-slate-400 uppercase">Tiempo</p><p className="text-lg font-black text-slate-900 dark:text-white">{project.daysLeft > 0 ? `${project.daysLeft} días` : 'Finalizado'}</p></div>
-                </div>
-
-                <div className="bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <div className="flex justify-between items-center mb-2">
-                        <p className="text-xs font-bold text-slate-400 uppercase">Presupuesto</p>
-                        <p className="text-xs font-bold text-slate-900 dark:text-white">${(project.spent/1000).toFixed(0)}k / ${(project.budget/1000).toFixed(0)}k</p>
-                    </div>
-                    <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2">
-                        <div className="bg-emerald-500 h-2 rounded-full" style={{ width: `${project.budget > 0 ? (project.spent/project.budget)*100 : 0}%` }}></div>
-                    </div>
-                </div>
-
-                <div className="bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center text-blue-600"><LucideCheckCircle2 size={24} /></div>
-                    <div><p className="text-xs font-bold text-slate-400 uppercase">Tareas</p><p className="text-lg font-black text-slate-900 dark:text-white">{project.pendingTasks} activas</p></div>
-                </div>
-            </div>
-
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 space-y-6">
+                    <div className="bg-white dark:bg-surface-dark p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Información General</h3>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="space-y-6">
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase mb-1">Cliente / Propietario</label>
+                                    {isEditing ? (
+                                        <input 
+                                            className="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl text-sm font-bold border-none outline-none ring-2 ring-primary/10 focus:ring-primary"
+                                            value={editData.cliente || ''}
+                                            onChange={(e) => setEditData({...editData, cliente: e.target.value})}
+                                        />
+                                    ) : (
+                                        <p className="text-sm font-bold text-slate-700 dark:text-white uppercase">{project.client || 'S/D'}</p>
+                                    )}
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase mb-1">Presupuesto Total ($)</label>
+                                    {isEditing ? (
+                                        <input 
+                                            type="number"
+                                            className="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl text-sm font-bold border-none outline-none ring-2 ring-primary/10 focus:ring-primary"
+                                            value={editData.presupuesto}
+                                            onChange={(e) => setEditData({...editData, presupuesto: e.target.value})}
+                                        />
+                                    ) : (
+                                        <p className="text-xl font-black text-emerald-600">${Number(project.budget || 0).toLocaleString()}</p>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="space-y-6">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase mb-1">Fecha Inicio</label>
+                                        {isEditing ? (
+                                            <input 
+                                                type="date"
+                                                className="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl text-xs font-bold border-none outline-none ring-2 ring-primary/10 focus:ring-primary"
+                                                value={editData.fecha_inicio ? editData.fecha_inicio.split('T')[0] : ''}
+                                                onChange={(e) => setEditData({...editData, fecha_inicio: e.target.value})}
+                                            />
+                                        ) : (
+                                            <p className="text-sm font-bold text-slate-700 dark:text-white">{project.startDate}</p>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black text-slate-400 uppercase mb-1">Entrega Estimada</label>
+                                        {isEditing ? (
+                                            <input 
+                                                type="date"
+                                                className="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl text-xs font-bold border-none outline-none ring-2 ring-primary/10 focus:ring-primary"
+                                                value={editData.fecha_fin ? editData.fecha_fin.split('T')[0] : ''}
+                                                onChange={(e) => setEditData({...editData, fecha_fin: e.target.value})}
+                                            />
+                                        ) : (
+                                            <p className="text-sm font-bold text-slate-700 dark:text-white">{project.endDate}</p>
+                                        )}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-[10px] font-black text-slate-400 uppercase mb-1">Estado de Obra</label>
+                                    {isEditing ? (
+                                        <select 
+                                            className="select-custom !p-2 !ring-1"
+                                            value={editData.estado}
+                                            onChange={(e) => setEditData({...editData, estado: e.target.value})}
+                                        >
+                                            <option value="pendiente">Pendiente</option>
+                                            <option value="en_curso">En Curso</option>
+                                            <option value="en_riesgo">En Riesgo</option>
+                                            <option value="finalizado">Finalizado</option>
+                                        </select>
+                                    ) : (
+                                        <p className="text-sm font-bold text-slate-700 dark:text-white uppercase">{project.status}</p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div className="bg-white dark:bg-surface-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
                         <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/30">
                             <div className="flex items-center gap-2"><LucideLayers className="text-primary" size={20} /><h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Etapas y Planificación Técnica</h3></div>
@@ -376,6 +509,22 @@ const ProjectDetail = () => {
                 </div>
 
                 <div className="space-y-6">
+                    <div className="bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+                        <div className="relative w-12 h-12 flex-shrink-0">
+                            <svg className="w-full h-full" viewBox="0 0 36 36">
+                                <path className="text-slate-100 dark:text-slate-800" strokeDasharray="100, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" />
+                                <path className="text-primary" strokeDasharray={`${project.progress}, 100`} d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+                            </svg>
+                            <span className="absolute inset-0 flex items-center justify-center text-[10px] font-bold">{project.progress}%</span>
+                        </div>
+                        <div><p className="text-xs font-bold text-slate-400 uppercase">Avance</p><p className="text-lg font-black text-slate-900 dark:text-white">General</p></div>
+                    </div>
+
+                    <div className="bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-lg bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center text-orange-600"><LucideClock size={24} /></div>
+                        <div><p className="text-xs font-bold text-slate-400 uppercase">Tiempo</p><p className="text-lg font-black text-slate-900 dark:text-white">{project.daysLeft > 0 ? `${project.daysLeft} días` : 'Finalizado'}</p></div>
+                    </div>
+
                     <div className="bg-white dark:bg-surface-dark p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
                         <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">Equipo del Proyecto</h3>
                         <p className="text-xs text-slate-400 italic">Conexión con personal en desarrollo...</p>
