@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { 
     LucideScale, LucideLayers, LucideInfo, LucidePackage, 
-    LucidePlus, LucideTrash2, LucideSettings2, LucideSearch, LucideX, LucideSave, LucideEdit3, LucideAlertTriangle
+    LucidePlus, LucideTrash2, LucideSettings2, LucideSearch, LucideX, LucideSave, LucideEdit3, LucideAlertTriangle,
+    LucideLayoutGrid
 } from 'lucide-react';
 
 const Units = () => {
@@ -22,6 +23,7 @@ const Units = () => {
     const TIPOS = [
         { id: 'masa', label: 'Peso / Masa', icon: LucideScale, color: 'text-blue-500' },
         { id: 'volumen', label: 'Volumen', icon: LucideLayers, color: 'text-emerald-500' },
+        { id: 'superficie', label: 'Superficie / Área', icon: LucideLayoutGrid, color: 'text-pink-500' },
         { id: 'longitud', label: 'Longitud', icon: LucideInfo, color: 'text-amber-500' },
         { id: 'conteo', label: 'Conteo / Unidad', icon: LucidePackage, color: 'text-purple-500' }
     ];

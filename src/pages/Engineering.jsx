@@ -56,15 +56,20 @@ const Engineering = () => {
 
     const handleCreateRubro = async () => {
         try {
-            // Asegurarse de que unidad_id no esté vacío
             if (!newRubro.unidad_id) {
                 alert('Por favor seleccione una unidad de medida oficial.');
                 return;
             }
 
+            const cleanData = {
+                ...newRubro,
+                personal_minimo: parseInt(newRubro.personal_minimo || 1),
+                rendimiento_mano_obra: parseFloat(newRubro.rendimiento_mano_obra || 1)
+            };
+
             const { data, error } = await supabase
                 .from('recetas_apu')
-                .insert([newRubro])
+                .insert([cleanData])
                 .select()
                 .single();
 
@@ -243,7 +248,7 @@ const Engineering = () => {
                                     <label className="block text-[10px] font-black text-slate-400 uppercase mb-1">Unidad</label>
                                     <select 
                                         className="select-custom"
-                                        value={newRubro.unit_id}
+                                        value={newRubro.unidad_id}
                                         onChange={(e) => setNewRubro({...newRubro, unidad_id: e.target.value})}
                                     >
                                         {unidades.map(u => (

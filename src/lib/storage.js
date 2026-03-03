@@ -15,7 +15,7 @@ export const uploadMedia = async (file, folder, id) => {
             maxSizeMB: isProfile ? 0.1 : 0.4,       // 100KB para perfil, 400KB para el resto
             maxWidthOrHeight: isProfile ? 400 : 1200, // 400px para perfil es suficiente
             useWebWorker: true,
-            fileType: 'image/jpeg',
+            fileType: 'image/webp',
             initialQuality: 0.8
         };
 
@@ -23,7 +23,7 @@ export const uploadMedia = async (file, folder, id) => {
         const compressedFile = await imageCompression(file, options);
         console.log(`[DBA] Finalizado: ${(compressedFile.size / 1024).toFixed(2)} KB.`);
 
-        const fileExt = 'jpg'; 
+        const fileExt = 'webp'; 
         const fileName = `${crypto.randomUUID()}.${fileExt}`;
         const filePath = `${folder}/${id}/${fileName}`;
 
