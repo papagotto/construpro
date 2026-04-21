@@ -1,75 +1,84 @@
-import { HashRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from './components/layout/MainLayout';
-import Home from './pages/Home';
-import Projects from './pages/Projects';
-import ProjectDetail from './pages/ProjectDetail';
-import Tasks from './pages/Tasks';
-import TaskDetail from './pages/TaskDetail';
-import Materials from './pages/Materials';
-import MaterialDetail from './pages/MaterialDetail';
-import Equipment from './pages/Equipment';
-import EquipmentDetail from './pages/EquipmentDetail';
-import Finances from './pages/Finances';
-import Users from './pages/Users';
-import Engineering from './pages/Engineering';
-import RubroDetail from './pages/RubroDetail';
-import Units from './pages/Units';
-import Reports from './pages/Reports';
-import Configuration from './pages/Configuration';
-import Profile from './pages/Profile';
-import Login from './pages/Login';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
 
-// Componente para proteger rutas
-const ProtectedRoute = ({ children }) => {
-  const { user, loading } = useAuth();
-  const location = useLocation();
+// Auth Pages
+import Login from './pages/auth/Login';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Verificando Seguridad...</p>
-        </div>
-      </div>
-    );
-  }
+// Dashboard Pages
+import Home from './pages/dashboard/Home';
+import Reports from './pages/dashboard/Reports';
+import Finances from './pages/dashboard/Finances';
 
-  if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
+// Projects Pages
+import Projects from './pages/projects/Projects';
+import ProjectDetail from './pages/projects/ProjectDetail';
 
-  return children;
-};
+// Resources Pages
+import Materials from './pages/resources/Materials';
+import MaterialDetail from './pages/resources/MaterialDetail';
+import Equipment from './pages/resources/Equipment';
+import EquipmentDetail from './pages/resources/EquipmentDetail';
+import Units from './pages/resources/Units';
+import Users from './pages/resources/Users';
+
+// Engineering Pages
+import Engineering from './pages/engineering/Engineering';
+import RubroDetail from './pages/engineering/RubroDetail';
+
+// Tasks Pages
+import Tasks from './pages/tasks/Tasks';
+import TaskDetail from './pages/tasks/TaskDetail';
+
+// Profile & Settings
+import Profile from './pages/profile/Profile';
+import Configuration from './pages/profile/Configuration';
+
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 function App() {
   return (
     <AuthProvider>
       <HashRouter>
         <Routes>
-          {/* Ruta Pública */}
+          {/* Rutas Públicas */}
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
-          {/* Rutas Protegidas bajo MainLayout */}
-          <Route path="/" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
-            <Route index element={<Home />} />
-            <Route path="proyectos" element={<Projects />} />
-            <Route path="proyectos/:id" element={<ProjectDetail />} />
-            <Route path="tareas" element={<Tasks />} />
-            <Route path="tareas/:id" element={<TaskDetail />} />
-            <Route path="recursos-materiales" element={<Materials />} />
-            <Route path="recursos-materiales/:id" element={<MaterialDetail />} />
-            <Route path="recursos-equipos" element={<Equipment />} />
-            <Route path="recursos-equipos/:id" element={<EquipmentDetail />} />
-            <Route path="finanzas" element={<Finances />} />
-            <Route path="usuarios" element={<Users />} />
-            <Route path="ingenieria" element={<Engineering />} />
-            <Route path="ingenieria/:id" element={<RubroDetail />} />
-            <Route path="unidades" element={<Units />} />
-            <Route path="reportes" element={<Reports />} />
-            <Route path="configuracion" element={<Configuration />} />
-            <Route path="perfil" element={<Profile />} />
+          {/* Rutas Protegidas (Layout Principal) */}
+          <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+            <Route path="/" element={<Home />} />
+            
+            {/* Obras y Proyectos */}
+            <Route path="/proyectos" element={<Projects />} />
+            <Route path="/proyectos/:id" element={<ProjectDetail />} />
+            
+            {/* Recursos e Inventario */}
+            <Route path="/recursos-materiales" element={<Materials />} />
+            <Route path="/recursos-materiales/:id" element={<MaterialDetail />} />
+            <Route path="/recursos-equipos" element={<Equipment />} />
+            <Route path="/recursos-equipos/:id" element={<EquipmentDetail />} />
+            <Route path="/recursos-unidades" element={<Units />} />
+            <Route path="/recursos-personal" element={<Users />} />
+            
+            {/* Ingeniería y APU */}
+            <Route path="/ingenieria" element={<Engineering />} />
+            <Route path="/ingenieria/:id" element={<RubroDetail />} />
+            
+            {/* Gestión de Tareas */}
+            <Route path="/tareas" element={<Tasks />} />
+            <Route path="/tareas/:id" element={<TaskDetail />} />
+            
+            {/* Reportes y Finanzas */}
+            <Route path="/reportes" element={<Reports />} />
+            <Route path="/finanzas" element={<Finances />} />
+            
+            {/* Configuración y Perfil */}
+            <Route path="/configuracion" element={<Configuration />} />
+            <Route path="/perfil" element={<Profile />} />
           </Route>
 
           {/* Redirección por defecto */}

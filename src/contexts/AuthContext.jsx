@@ -12,15 +12,20 @@ export const AuthProvider = ({ children }) => {
         // Inicialización rápida
         const initialize = async () => {
             try {
-                const { data: { session } } = await supabase.auth.getSession();
+                // Verificación inmediata de sesión
+                const { data: { session }, error } = await supabase.auth.getSession();
+                
+                if (error) throw error;
+
                 if (session) {
                     setUser(session.user);
-                    // Cargamos perfil sin esperar (no bloqueante)
+                    // Cargamos perfil sin esperar (no bloqueante para la UI)
                     fetchProfile(session.user.id);
                 }
             } catch (err) {
                 console.error('Error inicializando sesión:', err);
             } finally {
+                // Liberamos la UI lo antes posible
                 setLoading(false);
             }
         };
@@ -76,6 +81,18 @@ export const AuthProvider = ({ children }) => {
         if (error) throw error;
     };
 
+    const resetPassword = async (email) => {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/#/reset-password`,
+        });
+        if (error) throw error;
+    };
+
+    const updatePassword = async (newPassword) => {
+        const { error } = await supabase.auth.updateUser({ password: newPassword });
+        if (error) throw error;
+    };
+
     const updateProfile = async (updates) => {
         try {
             if (!user) throw new Error('No hay sesión activa');
@@ -97,7 +114,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, profile, loading, login, logout, updateProfile }}>
+        <AuthContext.Provider value={{ user, profile, loading, login, logout, resetPassword, updatePassword, updateProfile }}>
             {children}
         </AuthContext.Provider>
     );
