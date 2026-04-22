@@ -82,7 +82,18 @@ function App() {
           </Route>
 
           {/* Redirección por defecto */}
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={
+            window.location.hash.includes('access_token') ? (
+              <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+                  <p className="text-slate-500 text-sm font-bold uppercase tracking-widest animate-pulse">Validando Invitación...</p>
+                </div>
+              </div>
+            ) : (
+              <Navigate to="/" replace />
+            )
+          } />
         </Routes>
       </HashRouter>
     </AuthProvider>

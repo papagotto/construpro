@@ -7,7 +7,7 @@ const ResourceTabs = () => {
     const tabs = [
         { label: 'Materiales', path: '/recursos-materiales' },
         { label: 'Equipamiento', path: '/recursos-equipos' },
-        { label: 'Personal', path: '/usuarios' }
+        { label: 'Personal', path: '/recursos-personal' }
     ];
 
     return (

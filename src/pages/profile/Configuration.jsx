@@ -1,5 +1,5 @@
 import React from 'react';
-import { settings } from '../data/mockData';
+import { settings } from '../../data/mockData';
 import SettingsSection from '../../components/settings/SettingsSection';
 import DangerZone from '../../components/settings/DangerZone';
 
@@ -17,15 +17,16 @@ const Configuration = () => {
                 <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Administra las preferencias generales, notificaciones y seguridad de la plataforma.</p>
             </div>
 
-            <div className="grid grid-cols-1 gap-6">
-                {settings.sections.map((section) => (
-                    <SettingsSection key={section.id} section={section} />
+            <div className="space-y-6">
+                {settings?.map((section, idx) => (
+                    <SettingsSection key={idx} section={section} />
                 ))}
-            </div>
 
-            <DangerZone onDeleteAccount={handleDeleteAccount} />
+                <DangerZone onDeleteAccount={handleDeleteAccount} />
+            </div>
         </div>
     );
 };
 
 export default Configuration;
+

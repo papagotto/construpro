@@ -11,7 +11,7 @@ export const navigation = [
         subItems: [
             { name: 'Materiales', href: '/recursos-materiales', icon: 'storage' },
             { name: 'Equipamiento', href: '/recursos-equipos', icon: 'precision_manufacturing' },
-            { name: 'Personal', href: '/usuarios', icon: 'badge' }
+            { name: 'Personal', href: '/recursos-personal', icon: 'badge' }
         ]
     },
     {
@@ -21,7 +21,7 @@ export const navigation = [
         category: 'General',
         subItems: [
             { name: 'APU', href: '/ingenieria', icon: 'settings_suggest' },
-            { name: 'Unidades', href: '/unidades', icon: 'straighten' }
+            { name: 'Unidades', href: '/recursos-unidades', icon: 'straighten' }
         ]
     },
     { name: 'Finanzas', href: '/finanzas', icon: 'payments', category: 'General' },

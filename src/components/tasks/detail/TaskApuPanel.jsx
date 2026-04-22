@@ -1,5 +1,5 @@
 import React from 'react';
-import { LucideArchitecture, LucideClock, LucideAlertTriangle, LucideCheckCircle2 } from 'lucide-react';
+import { LucideDraftingCompass, LucideClock, LucideAlertTriangle, LucideCheckCircle2 } from 'lucide-react';
 
 const TaskApuPanel = ({ 
     task, 
@@ -15,7 +15,7 @@ const TaskApuPanel = ({
     return (
         <div className="bg-white dark:bg-surface-dark p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
             <div className="flex items-center gap-2 mb-6">
-                <LucideArchitecture className="text-primary" size={20} />
+                <LucideDraftingCompass className="text-primary" size={20} />
                 <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">Análisis de Rubro</h3>
             </div>
             

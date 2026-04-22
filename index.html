@@ -11,11 +11,27 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
     rel="stylesheet" />
+  
+  <script>
+    // MOTOR DE RESCATE DE INVITACIONES
+    // Transforma el formato de Supabase (#access_token=...) al formato de React (#/reset-password?...)
+    (function() {
+      var h = window.location.hash;
+      if (h && h.indexOf('access_token=') !== -1 && h.indexOf('#/') === -1) {
+        console.log('Redirigiendo flujo de invitación...');
+        // Guardamos el token por seguridad
+        sessionStorage.setItem('supabase_invite_token', h);
+        // Re-escribimos la URL para el HashRouter antes de que React cargue
+        var newHash = '#/reset-password?' + h.substring(1);
+        window.location.hash = newHash;
+      }
+    })();
+  </script>
 </head>
 
 <body>
   <div id="root"></div>
-  <script type="module" src="src/main.jsx"></script>
+  <script type="module" src="/src/main.jsx"></script>
 </body>
 
 </html>

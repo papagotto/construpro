@@ -7,7 +7,7 @@ import RecentProjects from '../../components/home/RecentProjects';
 import QuickActions from '../../components/home/QuickActions';
 
 const Home = () => {
-    const { profile } = useAuth();
+    const { user, profile } = useAuth();
     const navigate = useNavigate();
     const [stats, setStats] = useState({
         projects: 0,
@@ -86,7 +86,7 @@ const Home = () => {
 
     if (loading) return <div className="p-20 text-center uppercase tracking-widest text-xs font-bold text-slate-500 animate-pulse">Iniciando Centro de Mando...</div>;
 
-    const userName = profile?.identificador_usuario?.split('@')[0] || 'Director';
+    const userName = profile?.nombre || user?.email?.split('@')[0] || 'Director';
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">

@@ -1,120 +1,61 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import React, { createContext, useContext, useState } from 'react';
+import { authServices } from '../components/auth/authServices';
+import { useProfileLoader } from '../components/auth/useProfileLoader';
+import { useAuthObserver } from '../components/auth/useAuthObserver';
 
 const AuthContext = createContext({});
 
+/**
+ * AUTH PROVIDER REFACTORIZADO
+ * Orquestador principal que utiliza módulos especializados.
+ */
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        // Inicialización rápida
-        const initialize = async () => {
-            try {
-                // Verificación inmediata de sesión
-                const { data: { session }, error } = await supabase.auth.getSession();
-                
-                if (error) throw error;
+    // 1. Cargador de perfil (maneja fetching y bloqueos)
+    const { fetchProfile, lastFetchedId } = useProfileLoader(setProfile);
 
-                if (session) {
-                    setUser(session.user);
-                    // Cargamos perfil sin esperar (no bloqueante para la UI)
-                    fetchProfile(session.user.id);
-                }
-            } catch (err) {
-                console.error('Error inicializando sesión:', err);
-            } finally {
-                // Liberamos la UI lo antes posible
-                setLoading(false);
-            }
-        };
+    // 2. Observador de cambios de estado (maneja sesión y flujos de invitación)
+    useAuthObserver(setUser, setProfile, setLoading, fetchProfile, lastFetchedId);
 
-        initialize();
-
-        // Escuchar cambios (Login/Logout)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-            console.log('Auth Event:', event);
-            if (session) {
-                setUser(session.user);
-                fetchProfile(session.user.id);
-                setLoading(false); // Liberamos la UI inmediatamente
-            } else {
-                setUser(null);
-                setProfile(null);
-                setLoading(false);
-            }
-        });
-
-        return () => subscription.unsubscribe();
-    }, []);
-
-    const fetchProfile = async (userId) => {
-        try {
-            console.log('Buscando perfil para:', userId);
-            const { data, error } = await supabase
-                .from('usuarios')
-                .select('*, roles(nombre, nivel_acceso)')
-                .eq('id', userId)
-                .single();
-
-            if (error) {
-                console.warn('Perfil no encontrado:', error.message);
-                return;
-            }
-            console.log('Perfil cargado:', data);
-            setProfile(data);
-        } catch (error) {
-            console.error('Error en fetchProfile:', error);
-        }
-    };
-
+    /**
+     * Acciones expuestas al sistema
+     */
     const login = async (email, password) => {
-        // El login de Supabase ya dispara el onAuthStateChange
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        return data;
+        setLoading(true);
+        try {
+            return await authServices.login(email, password);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const logout = async () => {
-        const { error } = await supabase.auth.signOut();
-        if (error) throw error;
-    };
-
-    const resetPassword = async (email) => {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: `${window.location.origin}/#/reset-password`,
-        });
-        if (error) throw error;
-    };
-
-    const updatePassword = async (newPassword) => {
-        const { error } = await supabase.auth.updateUser({ password: newPassword });
-        if (error) throw error;
+        await authServices.logout();
+        setUser(null);
+        setProfile(null);
     };
 
     const updateProfile = async (updates) => {
-        try {
-            if (!user) throw new Error('No hay sesión activa');
-            
-            const { error } = await supabase
-                .from('usuarios')
-                .update(updates)
-                .eq('id', user.id);
-
-            if (error) throw error;
-
-            // Refrescar el perfil localmente
-            await fetchProfile(user.id);
-            return { success: true };
-        } catch (error) {
-            console.error('Error al actualizar perfil:', error);
-            throw error;
-        }
+        if (!user) throw new Error('No hay sesión activa');
+        await authServices.updateProfileData(user.id, updates);
+        await fetchProfile(user.id);
+        return { success: true };
     };
 
     return (
-        <AuthContext.Provider value={{ user, profile, loading, login, logout, resetPassword, updatePassword, updateProfile }}>
+        <AuthContext.Provider value={{ 
+            user, 
+            profile, 
+            loading, 
+            login, 
+            logout, 
+            resetPassword: authServices.resetPassword, 
+            updatePassword: authServices.updatePassword, 
+            updateProfile 
+        }}>
             {children}
         </AuthContext.Provider>
     );

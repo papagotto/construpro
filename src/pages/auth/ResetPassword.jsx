@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import AuthBranding from '../../components/shared/AuthBranding';
 import ResetPasswordForm from '../../components/auth/ResetPasswordForm';
+import { LucideLoader2 } from 'lucide-react';
 
 const ResetPassword = () => {
     const [password, setPassword] = useState('');
@@ -12,12 +13,17 @@ const ResetPassword = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     
-    const { updatePassword } = useAuth();
+    const { user, updatePassword } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+
+        if (!user) {
+            setError('Validando sesión de seguridad... Por favor espera un momento y vuelve a intentarlo.');
+            return;
+        }
 
         if (password !== confirmPassword) {
             setError('Las contraseñas no coinciden.');
@@ -38,8 +44,8 @@ const ResetPassword = () => {
                 navigate('/login');
             }, 3000);
         } catch (err) {
-            setError('No pudimos actualizar tu contraseña. El enlace podría haber expirado.');
-            console.error(err);
+            console.error('Error al actualizar contraseña:', err);
+            setError(err.message || 'No pudimos actualizar tu contraseña. El enlace podría haber expirado.');
         } finally {
             setIsLoading(false);
         }
@@ -50,18 +56,30 @@ const ResetPassword = () => {
             <div className="w-full max-w-md">
                 <AuthBranding subtitle="Nueva Contraseña" />
 
-                <ResetPasswordForm 
-                    password={password}
-                    setPassword={setPassword}
-                    confirmPassword={confirmPassword}
-                    setConfirmPassword={setConfirmPassword}
-                    showPassword={showPassword}
-                    setShowPassword={setShowPassword}
-                    isSuccess={isSuccess}
-                    isLoading={isLoading}
-                    error={error}
-                    handleSubmit={handleSubmit}
-                />
+                {!user ? (
+                    <div className="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl flex flex-col items-center justify-center space-y-4">
+                        <LucideLoader2 className="animate-spin text-primary" size={40} />
+                        <p className="text-sm font-black text-slate-500 uppercase tracking-widest text-center">
+                            Validando Token de Seguridad...
+                        </p>
+                        <p className="text-[10px] text-slate-400 text-center max-w-xs uppercase">
+                            Estamos estableciendo una conexión segura. Por favor, no cierres esta ventana.
+                        </p>
+                    </div>
+                ) : (
+                    <ResetPasswordForm 
+                        password={password}
+                        setPassword={setPassword}
+                        confirmPassword={confirmPassword}
+                        setConfirmPassword={setConfirmPassword}
+                        showPassword={showPassword}
+                        setShowPassword={setShowPassword}
+                        isSuccess={isSuccess}
+                        isLoading={isLoading}
+                        error={error}
+                        handleSubmit={handleSubmit}
+                    />
+                )}
             </div>
         </div>
     );

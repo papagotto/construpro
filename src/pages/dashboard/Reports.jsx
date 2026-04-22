@@ -1,5 +1,5 @@
 import React from 'react';
-import { reports, finances } from '../data/mockData';
+import { reports, finances } from '../../data/mockData';
 import ReportSelector from '../../components/reports/ReportSelector';
 import FinancialKPIs from '../../components/reports/FinancialKPIs';
 import StrategicDashboard from '../../components/reports/StrategicDashboard';

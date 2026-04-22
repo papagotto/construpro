@@ -44,7 +44,7 @@ const Navbar = ({ onToggleSidebar }) => {
     };
 
     const userName = profile?.nombre || user?.email?.split('@')[0] || 'Usuario';
-    const userRole = profile?.roles?.nombre || 'Consultor';
+    const userRole = profile?.roles?.nombre || profile?.rol || 'Consultor';
     const userAvatar = getMediaUrl(profile?.avatar_url);
 
     return (
